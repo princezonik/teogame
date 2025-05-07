@@ -16,7 +16,7 @@ class PuzzleSeeder extends Seeder
      */
     public function run(): void
     {
-        $gridSize = 5;
+       $gridSize = 5;
         $colors = ['red', 'blue', 'green'];
         $puzzle = Puzzle::create([
             'name' => 'Generated Puzzle',

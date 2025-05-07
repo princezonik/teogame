@@ -19,25 +19,19 @@ class PuzzleView extends Component
     public $puzzleId;   // Declare the public property for puzzleId
 
     //To initialize the puzzle grid from the database
-    public function mount()
-    {
+    public function mount(){
 
         // This method is not complete refer to it later
-
-
-
-         // Store puzzleId in the public property
        
-       
-        $puzzle = Puzzle::where('id', '=', 1)->first();
+        $puzzle = Puzzle::inRandomOrder()->first();
         
         $this->gridSize = $puzzle->grid_size;
         $this->initializeGrid($puzzle);
     }
 
     // Initialize the grid
-    public function initializeGrid($puzzle)
-    {
+    public function initializeGrid($puzzle){
+      
         // Retrieve the cells for the grid from the database
         $cells = PuzzleCell::where('puzzle_id', $puzzle->id)->get();
 
@@ -46,7 +40,11 @@ class PuzzleView extends Component
 
         // Populate grid with values from the database
         foreach ($cells as $cell) {
-            $this->grid[$cell->row][$cell->col] = $cell->value;
+            $this->grid[$cell->row][$cell->col] = [
+                'value' => $cell->value,
+                'color' => $cell->color,
+                'is_selected' => false,
+            ];
         }
 
         // Retrieve existing connections
@@ -54,24 +52,34 @@ class PuzzleView extends Component
     }
 
     // Handle cell click
-    public function clickCell($row, $col)
-    {
+    public function clickCell($row, $col){
+        
         // Only process if a color is selected
+        //This checks if a color has been selected (i.e., the user has clicked on a color endpoint first).
+        //If no color is selected, the method exits early — the user can’t build a path without a starting color.
         if (!$this->currentColor) {
             return;
         }
+        
 
+        //Retrieves the current cell’s contents from the grid (which could be null, a color, a value, etc.).
         // Get the current cell state
         $currentCell = $this->grid[$row][$col];
 
+
         // If the cell is already part of the current connection, return
+        //$this->selectedCells holds an array of all the cells selected in the current path.
+        //If the clicked cell is already in that list, it returns early
         if (in_array(['row' => $row, 'col' => $col], $this->selectedCells)) {
             return;
         }
 
         // If the cell is empty, proceed with connecting
+        //If the cell is empty, or is deemed a valid extension of the path (adjacent and unoccupied), continue.
         if ($currentCell === null || $this->isValidPath($row, $col)) {
+           
             // Add to selected cells
+            //Adds the newly clicked cell to the current path the player is drawing.
             $this->selectedCells[] = ['row' => $row, 'col' => $col];
 
             // Check if we have a valid path to form a connection
@@ -79,59 +87,248 @@ class PuzzleView extends Component
                 $this->storeConnection();
             }
         }
+
+        // If no color is active and clicked cell is an endpoint, start path
+        if (!$this->currentColor && isset($currentCell['value'])) {
+            $this->currentColor = $currentCell['color'];
+            $this->selectedCells = [[$row, $col]];
+            $this->grid[$row][$col]['is_selected'] = true;
+            return;
+        }
+
+        // If clicking same cell again, undo last move
+        $last = end($this->selectedCells);
+        if ($last === [$row, $col]) {
+            array_pop($this->selectedCells);
+            $this->grid[$row][$col]['is_selected'] = false;
+            if (empty($this->selectedCells)) {
+                $this->currentColor = null;
+            }
+            return;
+        }
+
+        // If a color is selected and clicked cell is adjacent and empty
+        if ($this->currentColor && !$currentCell['value'] && !$currentCell['color']) {
+            if ($this->isAdjacent($last, [$row, $col])) {
+                $this->selectedCells[] = [$row, $col];
+                $this->grid[$row][$col]['is_selected'] = true;
+                $this->grid[$row][$col]['color'] = $this->currentColor;
+                return;
+            }
+        }
+
+         // If final cell is valid endpoint (same color & adjacent), finish path
+        if ($this->currentColor && $currentCell['color'] === $this->currentColor && isset($currentCell['value'])) {
+            if ($this->isAdjacent($last, [$row, $col])) {
+                $this->selectedCells[] = [$row, $col];
+                $this->grid[$row][$col]['is_selected'] = true;
+                $this->finalizePath();
+                return;
+            }
+        }
+        
+        if ($currentCell && $currentCell['color'] && $currentCell['color'] !== $this->currentColor) {
+            // Cannot cross other paths
+            return;
+        }
+    
+        // Check adjacency if at least one cell already selected
+        if (!empty($this->selectedCells)) {
+            $last = end($this->selectedCells);
+            if (!$this->isAdjacent($last, ['row' => $row, 'col' => $col])) {
+                return;
+            }
+        }
+    
+        $this->selectedCells[] = ['row' => $row, 'col' => $col];
+        $this->grid[$row][$col]['is_selected'] = true;
+        $this->grid[$row][$col]['color'] = $this->currentColor;
+    
+        if ($this->hasPathCompleted()) {
+            $this->finalizePath();
+        }
+
+        // Any invalid click resets the path
+        $this->resetPath();
     }
 
     // Check if the path from start to the current cell is valid (no crossing paths)
-    private function isValidPath($row, $col)
-    {
-
+    private function isValidPath($row, $col){
         return true; 
     }
 
     // Check if a path is completed (user has selected start and end cells)
-    private function hasPathCompleted()
-    {
-        // Logic to check if a complete path has been selected for the color
-        return count($this->selectedCells) >= 2; // Example condition
+    private function hasPathCompleted(){
+        // check if a complete path has been selected for the color
+        //return count($this->selectedCells) >= 2;
+
+        if (count($this->selectedCells) < 2) {
+            return false;
+        }
+    
+        $first = $this->selectedCells[0];
+        $last = end($this->selectedCells);
+    
+        $firstCell = $this->grid[$first['row']][$first['col']];
+        $lastCell = $this->grid[$last['row']][$last['col']];
+    
+        // Check both endpoints are special cells with values (A, B, etc.)
+        if (!$firstCell['value'] || !$lastCell['value']) {
+            return false;
+        }
+    
+        // Check if both endpoints have the same color
+        return $firstCell['color'] === $lastCell['color'];
+        
     }
 
     // Store the connection into the database when a path is completed
-    private function storeConnection()
-    {
-        foreach ($this->selectedCells as $cell) {
-            PuzzleConnection::create([
-                'puzzle_id' => 1,  // Assuming puzzle ID is 1 for simplicity
-                'start_cell_id' => $cell['row'], // just an example
-                'end_cell_id' => $cell['col'], //  an example
-                'color' => $this->currentColor, // Store the color for the connection
-            ]);
+    private function storeConnection(){
+
+        // Get the first and last selected cells in the path
+        $start = $this->selectedCells[0];
+        $end = end($this->selectedCells);
+
+        // Find the corresponding PuzzleCell models
+        $startCell = PuzzleCell::where([
+            'puzzle_id' => $this->puzzleId,
+            'row' => $start['row'],
+            'col' => $start['col'],
+        ])->first();
+
+        $endCell = PuzzleCell::where([
+            'puzzle_id' => $this->puzzleId,
+            'row' => $end['row'],
+            'col' => $end['col'],
+        ])->first();
+
+        if (!$startCell || !$endCell) {
+            return; // Safety check
         }
+
+        // Prevent duplicate connections
+        $alreadyExists = PuzzleConnection::where('puzzle_id', $this->puzzleId)->where(function ($query) use ($startCell, $endCell) {
+            $query->where(function ($q) use ($startCell, $endCell) {
+                $q->where('start_cell_id', $startCell->id)
+                ->where('end_cell_id', $endCell->id);
+            })->orWhere(function ($q) use ($startCell, $endCell) {
+                $q->where('start_cell_id', $endCell->id)
+                ->where('end_cell_id', $startCell->id);
+            });
+        })->orWhere('color', $this->currentColor)->exists();
+
+        if ($alreadyExists) {
+            return; // Prevent overwriting or duplicate paths
+        }
+
+        // Create the connection
+        PuzzleConnection::create([
+            'puzzle_id' => $this->puzzleId,
+            'start_cell_id' => $startCell->id,
+            'end_cell_id' => $endCell->id,
+            'color' => $this->currentColor,
+        ]);
 
         // Reset for the next path
         $this->selectedCells = [];
+        $this->currentColor = null;
     }
 
     // Set the current color for the path
-    public function setCurrentColor($color)
-    {
+    public function setCurrentColor($color){
         $this->currentColor = $color;
     }
 
-    public function selectCell($row, $col)
-{
-    $cell = $this->grid[$row][$col];
+    public function selectCell($row, $col){
+        $cell = $this->grid[$row][$col];
 
-    // Disallow selecting cells already filled with a color
-    if (!empty($cell['color']) && !$cell['is_selected']) {
-        return;
+        // Disallow selecting cells already filled with a color
+        if (!empty($cell['color']) && !$cell['is_selected']) {
+            return;
+        }
+
+        $cell['is_selected'] = true;
+        $cell['color'] = $this->currentColor;
+
+        $this->grid[$row][$col] = $cell;
+        $this->selectedCells[] = $cell;
     }
 
-    $cell['is_selected'] = true;
-    $cell['color'] = $this->currentColor;
+    // public function handleCellClick($row, $col){
+        
+    //     $cell = $this->grid[$row][$col];
 
-    $this->grid[$row][$col] = $cell;
-    $this->selectedCells[] = $cell;
-}
+    //     // First click: Start a new path from an endpoint
+    //     if (!$this->currentColor && $cell['value']) {
+    //         $this->currentColor = $cell['color'];
+    //         $this->selectedCells = [[$row, $col]];
+    //         $this->grid[$row][$col]['is_selected'] = true;
+    //         return;
+    //     }
+
+    //     // Path building: Continue to adjacent, empty cell
+    //     if ($this->currentColor && !$cell['value'] && !$cell['color']) {
+    //         $last = end($this->selectedCells);
+    //         if ($this->isAdjacent($last, [$row, $col])) {
+    //             $this->selectedCells[] = [$row, $col];
+    //             $this->grid[$row][$col]['is_selected'] = true;
+    //             $this->grid[$row][$col]['color'] = $this->currentColor;
+    //         }
+    //         return;
+    //     }
+
+    //     // Final click: Connect to matching endpoint
+    //     if ($this->currentColor && $cell['color'] === $this->currentColor && $cell['value']) {
+    //         $last = end($this->selectedCells);
+    //         if ($this->isAdjacent($last, [$row, $col])) {
+    //             $this->selectedCells[] = [$row, $col];
+    //             $this->grid[$row][$col]['is_selected'] = true;
+    //             $this->finalizePath();
+    //         }
+    //         return;
+    //     }
+
+    //     // Invalid click: reset
+    //     $this->resetPath();
+    // }
+
+    public function isAdjacent($a, $b){
+        return abs($a[0] - $b[0]) + abs($a[1] - $b[1]) === 1;
+    }
+
+    public function finalizePath(){
+        // Save path to connections (optional), or just lock it in grid
+        foreach ($this->selectedCells as [$r, $c]) {
+            $this->grid[$r][$c]['color'] = $this->currentColor;
+        }
+
+        $this->currentColor = null;
+        $this->selectedCells = [];
+    }
+
+    public function resetPath(){
+        foreach ($this->selectedCells as [$r, $c]) {
+            if (!isset($this->grid[$r][$c]['value'])) {
+                $this->grid[$r][$c]['color'] = null;
+            }
+            $this->grid[$r][$c]['is_selected'] = false;
+        }
+        $this->currentColor = null;
+        $this->selectedCells = [];
+    }
+
+    public function undoLastStep(){
+
+        if (empty($this->selectedCells)) {
+            return;
+        }
+
+        $last = array_pop($this->selectedCells);
+        $this->grid[$last['row']][$last['col']]['color'] = null;
+        $this->grid[$last['row']][$last['col']]['is_selected'] = false;
+    }
+
+
 
 
     //render it

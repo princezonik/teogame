@@ -17,6 +17,12 @@ export default {
                 // sans: ['Inter', 'Helvetica', 'sans-serif','Figtree', ...defaultTheme.fontFamily.sans],
                 sans: ['Inter', 'Helvetica', 'sans-serif'],
             },
+            colors: {
+                red: { 600: '#dc2626' },
+                blue: { 600: '#2563eb' },
+                green: { 600: '#16a34a' },
+                
+              }
         },
     },
 
