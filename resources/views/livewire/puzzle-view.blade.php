@@ -1,74 +1,49 @@
-<div class="grid" style="display: grid; grid-template-columns: repeat({{ $gridSize }}, 40px); gap: 5px;">
-    @foreach ($grid as $rowIndex => $row)
-        @foreach ($row as $colIndex => $cell)
-            <div
-                class="cell"
-                style="
-                    width: 40px;
-                    height: 40px;
-                    background-color: {{ $cell['color'] ?? '#222' }};
-                    border: 1px solid #555;
-                    text-align: center;
-                    line-height: 40px;
-                    font-weight: bold;
-                    color: white;
-                "
-                wire:click="clickCell({{ $rowIndex }}, {{ $colIndex }})"
-            >
-                {{ $cell['value'] ?? '' }}
-            </div>
-        @endforeach
-    @endforeach
-</div>
+<div class="p-4">
+    <div class="grid" style="grid-template-columns: repeat({{ $gridSize }}, 3rem); display: grid; gap: 0.25rem;">
+        @foreach ($grid as $rowIndex => $row)
+            @foreach ($row as $colIndex => $cell)
+                @php
+                    $bgColor = $cell ? $cell['color'] : 'gray-800';
+                    $selected = $cell && $cell['is_selected'];
+                    $value = $cell['value'] ?? '';
+                @endphp
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-{{-- <div class="flex justify-center mt-5">
-    <table class="border-collapse">
-        <tbody>
-            @for ($row = 0; $row < $gridSize; $row++)
-                <tr>
-                    @for ($col = 0; $col < $gridSize; $col++)
-                        <td class="w-12 h-12 border border-gray-300 text-center cursor-pointer"
-                            wire:click="clickCell({{ $row }}, {{ $col }})"
-                            style="background-color: {{ in_array(['row' => $row, 'col' => $col], $selectedCells) ? $currentColor : 'transparent' }}">
-                            {{-- Display the cell value or leave empty --}}
-                            {{-- @if ($grid[$row][$col] !== null)
-                                <span>{{ $grid[$row][$col] }}</span>
-                            @endif
-                        </td>
-                    @endfor
-                </tr>
-            @endfor
-        </tbody>
-    </table>
-</div> --}} 
-
-{{-- <div class="max-w-md mx-auto mt-10">
-    <div class="grid" style="grid-template-columns: repeat({{ $gridSize }}, minmax(0, 1fr));">
-        @foreach ($grid as $row)
-            @foreach ($row as $cell)
                 <div 
-                    wire:click="handleCellClick({{ $cell['row'] }}, {{ $cell['col'] }})"
-                    class="w-14 h-14 m-0.5 flex items-center justify-center text-white font-bold cursor-pointer rounded-lg border
-                           {{ $cell['is_selected'] ? 'ring-4 ring-white' : 'ring-1 ring-gray-700' }}
-                           {{ $cell['color'] ? 'bg-' . $cell['color'] . '-600' : 'bg-gray-800' }}"
+                    class="w-12 h-12 flex items-center justify-center border border-gray-600 text-white font-bold cursor-pointer rounded
+                        {{ $selected ? 'ring-4 ring-white' : '' }} 
+                        {{ $value ? 'text-lg' : '' }}" 
+                    style="background-color: {{ $cell['color'] ?? '#2d3748' }};"
+                    wire:click="handleCellClick({{ $rowIndex }}, {{ $colIndex }})"
                 >
-                    {{ $cell['value'] ?? '' }}
+                    {{ $value }}
                 </div>
             @endforeach
         @endforeach
     </div>
-</div> --}}
 
+    <div class="mt-6 flex space-x-2">
+        @php
+            $availableColors = $grid 
+                ? collect($grid)->flatten(1)
+                    ->filter(fn($c) => $c && isset($c['value']) && $c['color'])
+                    ->pluck('color')
+                    ->unique()
+                    ->values()
+                : collect();
+        @endphp
+
+        @foreach ($availableColors as $color)
+            <button 
+                class="px-4 py-2 rounded text-white" 
+                style="background-color: {{ $color }};"
+                wire:click="setCurrentColor('{{ $color }}')"
+            >
+                {{ strtoupper($color) }}
+            </button>
+        @endforeach
+
+        @if ($currentColor)
+            <span class="ml-4 text-white">Current Color: <span style="color: {{ $currentColor }}">{{ $currentColor }}</span></span>
+        @endif
+    </div>
+</div>
