@@ -9,7 +9,8 @@
     <div class="flex w-3/5 h-1/3 justify-center ">
 
         {{-- @livewire('puzzle-view')  <!-- This renders the Livewire component --> --}}
-        <livewire:puzzle-view  />
+        {{-- <livewire:puzzle-view  /> --}}
+        @livewire('game-2048')
     </div>
 
     <!-- Right (tools) -->

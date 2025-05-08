@@ -33,6 +33,8 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
    
 
+// Route::get('/game', \App\Livewire\Game2048::class);
+
 Route::get('/tools/{slug}', ToolCalculator::class)->name('tools.show');
 
 
