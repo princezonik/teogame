@@ -10,7 +10,8 @@
 
         {{-- @livewire('puzzle-view')  <!-- This renders the Livewire component --> --}}
         {{-- <livewire:puzzle-view  /> --}}
-        @livewire('game-2048')
+        {{-- @livewire('game-2048') --}}
+        {{-- @livewire('sliding-puzzle') --}}
     </div>
 
     <!-- Right (tools) -->

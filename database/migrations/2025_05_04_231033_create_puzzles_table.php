@@ -13,8 +13,10 @@ return new class extends Migration
     {
         Schema::create('puzzles', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // The name of the puzzle (optional, could be a random name or a theme)
-            $table->integer('grid_size')->default(5); // The size of the grid (e.g., 5x5, 6x6, etc.)
+            $table->string('name')->nullable(); // Optional puzzle name or theme
+            $table->integer('grid_size')->default(5); // Grid size, default 5x5
+            $table->date('date')->unique(); // Date of the puzzle (for daily puzzles)
+            $table->integer('seed'); // Random seed for generation
             $table->timestamps();
         });
     }

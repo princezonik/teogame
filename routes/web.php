@@ -23,6 +23,7 @@ use App\Livewire\HomePage;
 use App\Http\Controllers\Api\PuzzleController;
 
 use App\Livewire\TeoGame;
+use App\Livewire\PuzzleDisplay;
 use App\Http\Controllers\Api\AttemptController;
 
 Route::get('/', HomePage::class)->name('home');
@@ -32,6 +33,9 @@ Route::get('/dashboard', function () {
     return view('dashboard'); 
 })->middleware(['auth', 'verified'])->name('dashboard');
    
+
+
+Route::get('/puzzle/{puzzleId}', PuzzleDisplay::class);
 
 // Route::get('/game', \App\Livewire\Game2048::class);
 

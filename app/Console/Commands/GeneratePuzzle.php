@@ -10,15 +10,7 @@ use Illuminate\Support\Facades\Log;
 
 class GeneratePuzzle extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    // protected $signature = 'app:generate-puzzle';
-
    
-
     /**
      * Execute the console command.
      */
@@ -28,6 +20,7 @@ class GeneratePuzzle extends Command
     
     public function handle()
     {
+         $date = now()->addDay()->startOfDay(); // generate for next day
         $date = now()->toDateString(); // Use today for testing
         $date = Carbon::today()->toDateString();
         // $date = Carbon::tomorrow()->toDateString();

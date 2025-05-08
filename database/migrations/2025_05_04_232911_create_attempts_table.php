@@ -13,13 +13,13 @@ return new class extends Migration
     {
         Schema::create('attempts', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->foreignId('puzzle_id')->constrained()->onDelete('cascade');
-            $table->string('name')->nullable(); // guest name
-            $table->json('moves');
-            $table->integer('time_ms');
-            $table->boolean('is_correct')->default(false); // whether solution is valid
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null'); // Nullable for guests
+            $table->json('move_list'); // User’s path (e.g., array of coordinates per color)
+            $table->integer('time_ms'); // Completion time in milliseconds
+            $table->boolean('is_valid')->default(false); // Whether solution is correct
             $table->timestamps();
+            $table->index(['puzzle_id', 'user_id', 'created_at']);
         });
     }
 

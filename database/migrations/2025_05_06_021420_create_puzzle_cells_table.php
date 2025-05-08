@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('puzzle_cells', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('puzzle_id')->constrained()->onDelete('cascade'); // Links to the puzzles table
-            $table->integer('row'); // Row index of the cell
-            $table->integer('col'); // Column index of the cell
-            $table->string('value')->nullable(); // Stores the value of the cell, e.g., 'X' or 'A' (can be null)
-            $table->string('color')->nullable(); // If a cell has a color, it would be stored here (optional for Flow Free)
+            $table->foreignId('puzzle_id')->constrained()->onDelete('cascade');
+            $table->integer('row'); // Row index (0–4)
+            $table->integer('col'); // Column index (0–4)
+            $table->string('color')->nullable(); // Color of dot (e.g., "red") or null for empty
             $table->timestamps();
+            $table->index(['puzzle_id', 'row', 'col']); // Optimize grid queries
         });
     }
 

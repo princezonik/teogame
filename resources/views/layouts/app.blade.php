@@ -38,6 +38,8 @@
             @yield('content')
         </main>
         
-        {{-- @livewireScripts --}}
+        @livewireScripts
+        {{-- <script defer src="//unpkg.com/alpinejs" defer></script> --}}
+
     </body>
 </html>

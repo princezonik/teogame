@@ -9,18 +9,14 @@ class Puzzle extends Model
 {
     use HasFactory;
 
-    protected $fillable = [
-        'date',
-        'seed',
-        'data',
-        'solution',
-    ];
+    protected $fillable = ['date', 'seed', 'grid_data'];
 
     protected $casts = [
-        'data' => 'array',
-        'solution' => 'array',
         'date' => 'date',
+        'grid_data' => 'json',
     ];
+
+ 
 
     public function attempts() {
         return $this->hasMany(Attempt::class);

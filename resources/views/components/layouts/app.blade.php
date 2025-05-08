@@ -6,15 +6,16 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     @livewireStyles
+    @stack('styles')
 
 
 </head>
 <body class="bg-gray-100 text-gray-800">
     {{ $slot }}
     
+    
     @livewireScripts
-    @stack('scripts')
-
     {{-- <script defer src="//unpkg.com/alpinejs" defer></script> --}}
+    @stack('scripts')
 </body>
 </html>

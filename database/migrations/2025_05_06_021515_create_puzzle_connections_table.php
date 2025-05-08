@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('puzzle_connections', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('puzzle_id')->constrained()->onDelete('cascade'); // Links to the puzzles table
-            $table->foreignId('start_cell_id')->constrained('puzzle_cells')->onDelete('cascade'); // Start cell of the connection
-            $table->foreignId('end_cell_id')->constrained('puzzle_cells')->onDelete('cascade'); // End cell of the connection
-            $table->string('color'); // Color of the connection (e.g., "red", "blue")
+            $table->foreignId('puzzle_id')->constrained()->onDelete('cascade');
+            $table->foreignId('start_cell_id')->constrained('puzzle_cells')->onDelete('cascade');
+            $table->foreignId('end_cell_id')->constrained('puzzle_cells')->onDelete('cascade');
+            $table->string('color'); // Connection color (e.g., "red")
+            $table->json('path')->nullable(); // Optional: Store valid path as JSON
             $table->timestamps();
+            $table->index(['puzzle_id', 'color']);
         });
     }
 

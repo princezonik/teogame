@@ -6,5 +6,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class PuzzleConnection extends Model
 {
-    //
+    protected $fillable = [
+        'color',       
+        
+    ];
 }
