@@ -1,29 +1,81 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="max-w-2xl mx-auto mt-8">
-        <h2 class="text-2xl font-bold mb-4">🏆 Leaderboard</h2>
 
-        <table class="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
-            <thead>
-                <tr class="bg-gray-100 text-left">
-                    <th class="py-2 px-4">#</th>
-                    <th class="py-2 px-4">User</th>
-                    <th class="py-2 px-4">Score</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach ($users as $index => $user)
-                    <tr class="border-t">
-                        <td class="py-2 px-4">{{ $index + 1 }}</td>
-                        <td class="py-2 px-4">{{ $user->name }}</td>
-                        <td class="py-2 px-4">{{ $user->score }}</td>
+<div class="container">
+
+        <h1>Leaderboard - Top 20</h1>
+        <div id="toast" style="display: none; position: fixed; top:20px; right:20px; background: #28a745; color: white; padding:10px 20px; border-radius:5px;"></div>
+        @if($scores->isEmpty())
+            <p>No scores available yet.</p>
+        @else
+            <table id="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Player</th>
+                        <th>Score</th>
                     </tr>
-                @endforeach
-            </tbody>
-        </table>
+                </thead>
+                
+                <tbody id="leaderboard-body">
+                    @foreach($scores as $index => $score)
+                        <tr data-user-id="{{ $score->user_id }}">
+                            <td>{{ $index + 1 }}</td>
+                            <td>{{ $score->user->name }}</td>
+                            <td>{{ $score->score }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        @endif
     </div>
+    
 @endsection
+
+@push('styles')
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+    </style>
+@endpush
+
+
+  
+
 
 
 

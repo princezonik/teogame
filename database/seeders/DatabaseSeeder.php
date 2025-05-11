@@ -27,19 +27,22 @@ class DatabaseSeeder extends Seeder
             UserScoreSeeder::class,
         ]);
 
-        // Call the RoleSeeder to populate the roles table
+       
         $this->call([
             RoleSeeder::class,
         ]);
 
         $this->call([
-            UserRoleSeeder::class, // Register the UserRoleSeeder
+            UserRoleSeeder::class,
         ]);
         $this->call([
-            FpsEstimatorSeeder::class, // Register the UserRoleSeeder
+            FpsEstimatorSeeder::class,
         ]);
         $this->call([
-           PuzzleSeeder::class, // Register the UserRoleSeeder
+           PuzzleSeeder::class, 
+        ]);
+        $this->call([
+           ScoreSeeder::class, 
         ]);
     }
 }

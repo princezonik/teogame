@@ -3,8 +3,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const difficultySelector = document.getElementById('difficulty');
     const popup = document.getElementById('solved-popup');
     const closePopupBtn = document.getElementById('close-popup');
+    const moveCounter = document.getElementById('move-counter');
+    const timeCounter = document.getElementById('time-counter');
 
     let gridSize = 3;
+    let moveCount = 0;
+    let startTime;
+    let timerInterval;
 
     function generatePuzzle(size) {
         gridSize = size;
@@ -25,6 +30,10 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         renderTiles(tiles);
+        moveCount = 0;
+        moveCounter.textContent = '0';
+        resetTimer();
+        startTimer();
     }
 
     function shuffle(array) {
@@ -85,12 +94,17 @@ document.addEventListener('DOMContentLoaded', () => {
         const emptyIndex = tiles.findIndex(tile => tile.classList.contains('empty'));
 
         if (isAdjacent(clickedIndex, emptyIndex)) {
+            moveCount++;
+            moveCounter.textContent = moveCount;
+
             swapTiles(clickedIndex, emptyIndex);
             updateIndices();
 
             const currentValues = Array.from(puzzleContainer.children).map(t => parseInt(t.dataset.value));
             if (isSolved(currentValues)) {
+                stopTimer();
                 popup.classList.remove('hidden');
+                saveStats();
             }
         }
     }
@@ -125,6 +139,40 @@ document.addEventListener('DOMContentLoaded', () => {
         generatePuzzle(gridSize);
     });
 
-    // Initial render
+    function startTimer() {
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - startTime) / 1000);
+            timeCounter.textContent = formatTime(elapsed);
+        }, 1000);
+    }
+
+    function stopTimer() {
+        clearInterval(timerInterval);
+    }
+
+    function resetTimer() {
+        clearInterval(timerInterval);
+        timeCounter.textContent = "0:00";
+    }
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60);
+        const secs = seconds % 60;
+        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+    }
+
+    function saveStats() {
+        const elapsed = Math.floor((Date.now() - startTime) / 1000);
+        const stats = {
+            difficulty: gridSize,
+            moves: moveCount,
+            time: elapsed,
+            date: new Date().toISOString()
+        };
+        localStorage.setItem(`slidingPuzzle_last_${gridSize}x${gridSize}`, JSON.stringify(stats));
+    }
+
+    // Start initial game
     generatePuzzle(gridSize);
 });

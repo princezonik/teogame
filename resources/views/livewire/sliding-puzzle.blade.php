@@ -10,6 +10,16 @@
         </select>
     </div>
 
+    <div class="mb-4 flex items-center gap-6">
+        <div class="text-lg">
+            🧮 Moves: <span id="move-counter" class="font-bold">0</span>
+        </div>
+        <div class="text-lg">
+            ⏱️ Time: <span id="time-counter" class="font-bold">0:00</span>
+        </div>
+    </div>
+    
+
     <div id="puzzle-grid"
          class="grid gap-2 p-4 rounded-2xl shadow-lg bg-cyan-700 transition-all duration-300"
          style="width: fit-content; max-width: 90vw;">

@@ -9,11 +9,10 @@ class Puzzle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['date', 'seed', 'grid_data'];
+    protected $fillable = ['name','date', 'seed', 'grid_data'];
 
     protected $casts = [
         'date' => 'date',
-        'grid_data' => 'json',
     ];
 
  

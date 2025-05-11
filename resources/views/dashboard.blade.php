@@ -18,10 +18,10 @@
     @section('content')
 
         <div class="flex">
-            @livewire('sidebar')
+            @livewire('nav-bar')
         
             <div class="w-5/6 p-6">
-                @livewire('dashboard')                
+                {{-- @livewire('dashboard')                 --}}
             </div>
         </div>
 

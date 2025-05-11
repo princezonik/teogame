@@ -21,28 +21,52 @@ use App\Http\Controllers\ToolController;
 use App\Livewire\ToolCalculator;
 use App\Livewire\HomePage;
 use App\Http\Controllers\Api\PuzzleController;
+use App\Http\Controllers\Auth\AuthController;
 
 use App\Livewire\TeoGame;
 use App\Livewire\PuzzleDisplay;
 use App\Http\Controllers\Api\AttemptController;
+use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\ScoreController;
 
 Route::get('/', HomePage::class)->name('home');
 
 
-Route::get('/dashboard', function () { 
-    return view('dashboard'); 
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/register', [RegisteredUserController::class, 'showRegisterForm'])->name('register');
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthenticatedSessionController::class, 'login'])->name('login');
+Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+
+Route::middleware('auth')->group(function () {
+    Route::post('/scores', [ScoreController::class, 'store'])->name('scores.store');
+    Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
+    Route::post('/leaderboard/refresh', [LeaderboardController::class, 'refresh'])->name('leaderboard.refresh');
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/submit-score', function(){ 
+        return view('submit-score');
+    })->name('scores.create');
+});
+    
+Route::get('/dashboard', function () {
+    return view('dashboard');
+})->middleware(['auth'])->name('dashboard');
+
+
+// Route::get('/dashboard', function () { 
+//     return view('dashboard'); 
+// })->middleware(['auth', 'verified'])->name('dashboard');
    
 
-
-Route::get('/puzzle/{puzzleId}', PuzzleDisplay::class);
 
 // Route::get('/game', \App\Livewire\Game2048::class);
 
 Route::get('/tools/{slug}', ToolCalculator::class)->name('tools.show');
 
 
-Route::get('/teo-game', TeoGame::class)->name('teo-game'); // Route for the main game page
 
 Route::post('/submit-attempt', [AttemptController::class, 'store'])->name('submit-attempt');
 
@@ -94,18 +118,14 @@ Route::prefix('api')->group(function () {
     
     // Fetch today's puzzle
     Route::get('/puzzle/today', [PuzzleController::class, 'today']);
+    Route::post('/attempts', [AttemptController::class, 'store']);
+
 });
 
-Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
 
 
 Route::get('/tools', [ToolController::class, 'index']);
 
  
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-    
+
 require __DIR__.'/auth.php';

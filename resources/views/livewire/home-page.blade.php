@@ -1,9 +1,13 @@
 <!-- Main layout -->
 <div class="flex h-screen w-screen bg-[#f9f9f9]  ">
+
+
+    <!-- navbar (top) -->
+    @livewire('nav-bar')
     <!-- Sidebar (left) -->
-    <div class="w-1/4  flex justify-center items-center font-sans">
-       @livewire('sidebar')
-    </div>
+    {{-- <div class="w-1/4  flex justify-center items-center font-sans">
+      @livewire('sidebar')
+    </div> --}}
 
     <!-- Middle (puzzle + sticky navbar) -->
     <div class="flex w-3/5 h-1/3 justify-center ">
@@ -12,6 +16,7 @@
         {{-- <livewire:puzzle-view  /> --}}
         {{-- @livewire('game-2048') --}}
         {{-- @livewire('sliding-puzzle') --}}
+        {{-- @livewire('play-puzzle') --}}
     </div>
 
     <!-- Right (tools) -->

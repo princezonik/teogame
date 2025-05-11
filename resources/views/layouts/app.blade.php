@@ -15,14 +15,14 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
         {{-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> --}}
-         {{-- @livewireStyles --}}
-       
+        @livewireStyles
+        @stack('styles')
     </head>
 
 
     <body class="font-sans antialiased">
       
-        @include('layouts.navigation')
+        {{-- @include('layouts.navigation') --}}
 
         <!-- Page Heading -->
         @isset($header)
@@ -40,6 +40,7 @@
         
         @livewireScripts
         {{-- <script defer src="//unpkg.com/alpinejs" defer></script> --}}
-
+        
+        @stack('scripts')
     </body>
 </html>

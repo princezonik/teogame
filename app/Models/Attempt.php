@@ -10,15 +10,20 @@ class Attempt extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['puzzle_id', 'user_id', 'move_list', 'time_ms', 'is_valid'];
+
     protected $casts = [
-        'moves' => 'array',
+        'move_list' => 'json',
+        'is_valid' => 'boolean',
     ];
 
-    public function user() {
-        return $this->belongsTo(User::class);
+    public function puzzle()
+    {
+        return $this->belongsTo(Puzzle::class);
     }
 
-    public function puzzle() {
-        return $this->belongsTo(Puzzle::class);
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
