@@ -56,6 +56,13 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 
+
+Route::get('/catalog', fn () => view('pages.catalog'))->name('catalog');
+Route::get('/players', fn () => view('pages.players'))->name('players');
+Route::get('/games', fn () => view('pages.games'))->name('games');
+Route::get('/groups', fn () => view('pages.groups'))->name('groups');
+
+
 // Route::get('/dashboard', function () { 
 //     return view('dashboard'); 
 // })->middleware(['auth', 'verified'])->name('dashboard');

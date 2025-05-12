@@ -12,10 +12,12 @@
         @livewireStyles
         @stack('styles')
     </head>
-    <body class="bg-gray-100 text-gray-800">
+    <body class="flex flex-col bg-gray-100 text-gray-800 ">
         {{ $slot }}
+
         
         
+        @livewire('footer')
         @livewireScripts
         {{-- <script defer src="//unpkg.com/alpinejs" defer></script> --}}
         @stack('scripts')

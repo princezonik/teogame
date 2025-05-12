@@ -20,7 +20,7 @@
     </head>
 
 
-    <body class="font-sans antialiased">
+    <body class="font-sans antialiased flex flex-col">
       
         {{-- @include('layouts.navigation') --}}
 
@@ -34,13 +34,10 @@
         @endisset
 
         <!-- Page Content -->
-        <main>
+        <main >
             @yield('content')
         </main>
-        
-        @livewireScripts
-        {{-- <script defer src="//unpkg.com/alpinejs" defer></script> --}}
-        
-        @stack('scripts')
+ 
     </body>
+
 </html>

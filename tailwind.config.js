@@ -21,8 +21,16 @@ export default {
                 red: { 600: '#dc2626' },
                 blue: { 600: '#2563eb' },
                 green: { 600: '#16a34a' },
-                
-              }
+                slategray: '#393e43',
+                darkslate: '#32383e',
+                actionblue: '#0084dd',
+                light: '#e9ecef',
+                dark: '#272B30',
+            },
+            fontSize: {
+                heading:  '1.640625rem'
+            },
+            
         },
     },
 
