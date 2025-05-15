@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Livewire;
+namespace App\Livewire\Calculator;
 
 use Livewire\Component;
 
@@ -39,6 +39,6 @@ class CraftVsBuyRoiCalculator extends Component
     }
     public function render()
     {
-        return view('livewire.craft-vs-buy-roi-calculator');
+        return view('livewire.craft-roi');
     }
 }

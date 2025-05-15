@@ -41,8 +41,16 @@ class DatabaseSeeder extends Seeder
         $this->call([
            PuzzleSeeder::class, 
         ]);
+
+         $this->call([
+           GameSeeder::class, 
+         ]);
         $this->call([
            ScoreSeeder::class, 
         ]);
+        $this->call([
+           CalculatorSeeder::class, 
+        ]);
+       
     }
 }

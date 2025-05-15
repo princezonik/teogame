@@ -11,22 +11,22 @@ class FeatureGrid extends Component
         [
             'title' => 'Catalog',
             'description' => 'Browse items with thumbnail images and narrow your search with filtering and sorting',
-            'route' => 'catalog'
+            // 'route' => 'catalog'
         ],
         [
             'title' => 'Players',
             'description' => 'Check your item inventory, value, and track your progress with our player history chart',
-            'route' => 'players'
+            // 'route' => 'players'
         ],
         [
             'title' => 'Games',
             'description' => 'Find in-depth Roblox game stats with Rolimon\'s game analytics',
-            'route' => 'games'
+            // 'route' => 'games'
         ],
         [
             'title' => 'Groups',
             'description' => 'Membership charts and other stats for Roblox groups',
-            'route' => 'groups'
+            // 'route' => 'groups'
         ],
         // ... Add the rest similarly
     ];

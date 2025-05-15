@@ -1,7 +1,8 @@
 <!-- Main layout -->
-<div class="flex h-screen w-screen bg-[#f9f9f9]  ">
+<div class="flex flex-col w-full h-full bg-[#f9f9f9] overflow-x-hidden">
 
-
+  {{-- @livewire('section-card') --}}
+  {{-- @livewire('feature-grid') --}}
     <!-- navbar (top) -->
     {{-- @livewire('nav-bar') --}}
     <!-- Sidebar (left) -->
@@ -10,8 +11,8 @@
     </div> --}}
 
     <!-- Middle (puzzle + sticky navbar) -->
-    <div class=" w-3/5 h-full   mx-auto ">
-      @livewire('feature-grid')
+    {{-- <div class=" w-3/5 h-full   mx-auto "> --}}
+      {{-- @livewire('feature-grid') --}}
       
       
       {{-- @livewire('puzzle-view')  <!-- This renders the Livewire component --> --}}
@@ -20,10 +21,10 @@
         {{-- @livewire('sliding-puzzle') --}}
         {{-- @livewire('play-puzzle') --}}
 
-      <div class="mt-10 mb-10">
+      {{-- <div class="mt-10 mb-10">
         
         @livewire('section-card')
-      </div>
+      </div> --}}
     </div>
 
     
@@ -34,3 +35,4 @@
     
    
 </div>
+ 

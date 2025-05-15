@@ -1,22 +1,22 @@
-<div class="max-w-7xl mx-auto  gap-4 p-4 bg-slategray text-[#aaa] shadow-lg">
-    {{-- grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 --}}
+<div class="w-[56rem] mx-auto mt-[200px] gap-4 p-4 bg-slategray text-[#aaa] shadow-lg mb-10">
+    
     <div class="mx-auto">
        <h1 class="text-heading text-light text-center">{{$title}}</h1>
     </div>
     <hr class="border-dark">
    
-   <div class="grid grid-cols-4 gap-4">
-    @foreach ($communities as $community)
-    <div class="flex flex-col h-full justify-end items-center">
-        <h3 class="text-lg text-[#1aa3e3] font-[1.17187rem]">{{ $community['title'] }}</h3>
+    <div class="grid grid-cols-4 gap-4">
+        @foreach ($communities as $community)
+        <div class="flex flex-col h-full justify-end items-center">
+            <h3 class="text-lg text-[#1aa3e3] font-[1.17187rem]">{{ $community['title'] }}</h3>
 
-        <div class="flex-grow flex justify-end items-center">
-            {!! $community['icon'] !!}
+            <div class="flex-grow flex justify-end items-center">
+                {!! $community['icon'] !!}
+            </div>
         </div>
-    </div>
-    @endforeach
+        @endforeach
 
-</div>
+    </div>
 
 
     <div class="flex items-center justify-center">

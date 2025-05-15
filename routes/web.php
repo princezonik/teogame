@@ -28,17 +28,22 @@ use App\Livewire\PuzzleDisplay;
 use App\Http\Controllers\Api\AttemptController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\ScoreController;
+use App\Http\Controllers\GameController;
+
 
 Route::get('/', HomePage::class)->name('home');
 
+Route::resource('games', GameController::class)->only('index', 'show');
 
 Route::get('/register', [RegisteredUserController::class, 'showRegisterForm'])->name('register');
-Route::post('/register', [AuthController::class, 'register']);
+// Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthenticatedSessionController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-
+Route::resource('calculators', CalculatorController::class);
+Route::get('/calculator/{slug}', [CalculatorController::class, 'show'])->name('calculator.show');
 Route::middleware('auth')->group(function () {
     Route::post('/scores', [ScoreController::class, 'store'])->name('scores.store');
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
@@ -57,10 +62,9 @@ Route::get('/dashboard', function () {
 
 
 
-Route::get('/catalog', fn () => view('pages.catalog'))->name('catalog');
-Route::get('/players', fn () => view('pages.players'))->name('players');
-Route::get('/games', fn () => view('pages.games'))->name('games');
-Route::get('/groups', fn () => view('pages.groups'))->name('groups');
+
+// Route::resource('games', GameController::class)->only(['index', 'show']);
+
 
 
 // Route::get('/dashboard', function () { 
@@ -81,14 +85,14 @@ Route::post('/submit-attempt', [AttemptController::class, 'store'])->name('submi
 // Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 
+Route::get('/robux-usd', [ConverterController::class, 'showForm']);
+Route::post('/robux-usd', [ConverterController::class, 'convert'])->name('convert');
+
+Route::get('/ttk', [TtkCalculatorController::class, 'showForm']);
+Route::post('/ttk', [TtkCalculatorController::class, 'calculate'])->name('ttk.calculate');
 
 Route::prefix('tools')->group(function () {
     
-    Route::get('/robux-usd', [ConverterController::class, 'showForm']);
-    Route::post('/robux-usd', [ConverterController::class, 'convert'])->name('convert');
-    
-    Route::get('/ttk', [TtkCalculatorController::class, 'showForm']);
-    Route::post('/ttk', [TtkCalculatorController::class, 'calculate'])->name('ttk.calculate');
     
     Route::get('/lootdrop_simulator', [LootDropSimulatorController::class, 'showForm']);
     Route::post('/lootdrop/calculate', [LootDropSimulatorController::class, 'calculate'])->name('lootdrop.calculate');

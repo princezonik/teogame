@@ -1,7 +1,7 @@
 
 Echo.private('leaderboard').listen('.ScoreUpdated', (e) => {
     console.log('Score updated', e);
-    fetchLeaderboard();
+    // fetchLeaderboard();
 });
 
 function fetchLeaderboard() {

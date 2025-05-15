@@ -16,16 +16,20 @@ class ScoreController extends Controller
     {
         $request->validate([
             'score' => 'required|integer|min:0',
-            'game_name' => 'nullable|string|max:255',
+            'title' => 'nullable|string|max:255',
+            'game_id' => 'required|integer|exists:games,id',
         ]);
 
         //Cache Invalidation: When a new score is saved, the cache is cleared with. The next request rebuilds the cache with fresh data.
-
+        
         $score = Score::create([
             'user_id' => Auth::id(),
+            'game_id' => $request->game_id,
             'score' => $request->score,
-            'game_name' => $request->game_name,
+            'title' => $request->title,
         ]);
+
+        
 
         //check if score is in top 20
         // Invalidate the leaderboard cache if this score is in the top 20
@@ -44,7 +48,15 @@ class ScoreController extends Controller
 
         event(new ScoreUpdated($score));
 
-        return response()->json(['message' => 'Score saved successfully']);
+        return response()->json([
+            'message' => 'Score saved successfully',
+            'data' => [
+                'user_id' => $score->user_id,
+                'game_id' => $score->game_id,
+                'user_name' => $score->user->name,
+                'score' => $score->score,
+            ]
+        ]);
     }
 
 }

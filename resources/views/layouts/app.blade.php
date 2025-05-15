@@ -20,24 +20,28 @@
     </head>
 
 
-    <body class="font-sans antialiased flex flex-col">
+    <body class="font-sans antialiased flex flex-col overflow-x-hidden">
       
         {{-- @include('layouts.navigation') --}}
+        {{-- @livewire('nav-bar') --}}
 
         <!-- Page Heading -->
-        @isset($header)
+        {{-- @isset($header)
             <header class="bg-white dark:bg-gray-800 shadow">
                 <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
                     {{ $header }}
                 </div>
             </header>
-        @endisset
+        @endisset --}}
 
         <!-- Page Content -->
         <main >
             @yield('content')
         </main>
  
+        @livewire('footer')
+        @livewireScripts
+        @stack('scripts')
     </body>
 
 </html>

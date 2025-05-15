@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Game;
 use Livewire\Component;
 use App\Models\Puzzle;
 use App\Models\PuzzleCell;
@@ -10,7 +11,7 @@ use App\Models\PuzzleConnection;
 
 class PuzzleView extends Component
 {
-
+    public $game;
     public $gridSize;
     public $grid = [];
     public $connections = [];
@@ -19,10 +20,10 @@ class PuzzleView extends Component
     public $puzzleId;   // Declare the public property for puzzleId
 
     //To initialize the puzzle grid from the database
-    public function mount(){
+    public function mount(Game $game){
 
         // This method is not complete refer to it later
-       
+       $this->game = $game;
         $puzzle = Puzzle::inRandomOrder()->first();
         
         $this->gridSize = $puzzle->grid_size;

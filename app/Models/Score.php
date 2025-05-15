@@ -9,9 +9,13 @@ class Score extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['user_id', 'score', 'game_name'];
+    protected $fillable = ['user_id', 'score', 'game_id'];
 
     public function user(){
         return $this->belongsTo(User::class);
+    }
+
+    public function game(){
+        return $this->belongsTo(Game::class);
     }
 }

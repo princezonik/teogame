@@ -39,6 +39,7 @@ class ScoreUpdated implements ShouldBroadcast
     {
         return [
             'user_id' => $this->score->user_id,
+            'game_id' => $this->score->game_id,
             'user_name' => $this->score->user->name,
             'score' => $this->score->score,
         ];

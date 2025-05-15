@@ -2,10 +2,19 @@
 
 namespace App\Livewire;
 
+use App\Models\Game;
 use Livewire\Component;
 
 class SlidingPuzzle extends Component
 {
+
+    public $game;
+
+    // The mount method will load the game
+    public function mount(Game $game)
+    {
+        $this->game = $game;
+    }
 
     // public array $tiles = [];
 

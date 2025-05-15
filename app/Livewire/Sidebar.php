@@ -2,49 +2,44 @@
 
 namespace App\Livewire;
 
+use App\Models\Calculator;
 use Livewire\Component;
 
 class Sidebar extends Component
 {
-    public $activePage = 'dashboard';
-    protected $listeners = ['setActivePage' => 'updateActivePage'];
-    public $currentCalculator = null;
-    public $showCalculatorMenu = false;
-
-
-    public $showCalculators = false;
+    public $calculators;
+    public $activeCalculator = null;
     public $selectedCalculator = null;
 
-    public function toggleCalculators()
+    public function mount()
     {
-        $this->showCalculators = !$this->showCalculators;
+        $this->calculators = Calculator::where('is_visible', true)->get();
     }
 
-    public function selectCalculator($calculator)
+    public function toggleCalculator($calculatorId)
     {
-        $this->selectedCalculator = $calculator;
-        $this->dispatch('loadCalculator', $calculator);
+        $this->activeCalculator = $this->activeCalculator === $calculatorId ? null : $calculatorId;
     }
 
-    public function toggleCalculatorMenu()
+    public function showCalculator($id)
     {
-        $this->showCalculatorMenu = !$this->showCalculatorMenu;
+        $this->selectedCalculator = Calculator::find($id);
     }
 
-    public function loadCalculator($componentName)
+    public function openCalculator($slug)
     {
-        $this->currentCalculator =  $componentName;
+        // $this->activeCalculator = Calculator::where('slug', $slug)->first();
+        $this->activeCalculator = $slug;
     }
 
-
-    public function updateActivePage($page)
+    public function goBack()
     {
-        $this->activePage = $page;
-        $this->dispatch('loadPage', $page);
+        $this->selectedCalculator = null;
     }
 
     public function render()
     {
-        return view('livewire.sidebar');
+        
+        return view('livewire.sidebar', ['calculators' => Calculator::all(),]);
     }
 }

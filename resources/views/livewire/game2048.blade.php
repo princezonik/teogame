@@ -40,6 +40,13 @@
         <button onclick="undoMove()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Undo</button>
         <button onclick="replayGame()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Replay</button>
     </div>
+
+
+    <div class="max-w-4xl mx-auto flex flex-col gap-4 mt-10 p-4 bg-slategray text-[#9fa0a0] shadow-lg">
+        <div><h1>{{$game->title}} Description</h1></div>
+        <div>{{$game->description}}</div>
+
+    </div>
 </div>
 
 @push('scripts')

@@ -12,9 +12,9 @@
                 @enderror
             </div>
             <div class="form-group">
-                <label for="game_name">Game Name (Optional)</label>
-                <input type="text" name="game_name" id="game_name" value="{{ old('game_name') }}" maxlength="255">
-                @error('game_name')
+                <label for="game_id">Game ID </label>
+                <input type="text" name="game_id" id="game_id" value="" maxlength="255" required>
+                @error('game_id')
                     <p class="error">{{ $message }}</p>
                 @enderror
             </div>
