@@ -31,23 +31,32 @@ use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CalculatorController;
 use App\Http\Controllers\ScoreController;
 use App\Http\Controllers\GameController;
-
+use App\Livewire\Calculator\DpsTtkCalculator;
+use App\Livewire\Calculator\ExpToLevel;
+use App\Livewire\Calculator\RobuxConverter;
 
 Route::get('/', HomePage::class)->name('home');
 
 Route::resource('games', GameController::class)->only('index', 'show');
 
+
+
 Route::get('/register', [RegisteredUserController::class, 'showRegisterForm'])->name('register');
-// Route::post('/register', [AuthController::class, 'register']);
+Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthenticatedSessionController::class, 'login'])->name('login');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 Route::resource('calculators', CalculatorController::class);
 Route::get('/calculator/{slug}', [CalculatorController::class, 'show'])->name('calculator.show');
+
+
+//Auth middleware
+
 Route::middleware('auth')->group(function () {
     Route::post('/scores', [ScoreController::class, 'store'])->name('scores.store');
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
     Route::post('/leaderboard/refresh', [LeaderboardController::class, 'refresh'])->name('leaderboard.refresh');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -61,38 +70,31 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 
-
-
-// Route::resource('games', GameController::class)->only(['index', 'show']);
-
-
-
 // Route::get('/dashboard', function () { 
 //     return view('dashboard'); 
 // })->middleware(['auth', 'verified'])->name('dashboard');
    
 
+Route::post('/2048/score', [GameController::class, 'store2048Score']);
 
-// Route::get('/game', \App\Livewire\Game2048::class);
-
-Route::get('/tools/{slug}', ToolCalculator::class)->name('tools.show');
-
+// Route::get('/tools/{slug}', ToolCalculator::class)->name('tools.show');
 
 
-Route::post('/submit-attempt', [AttemptController::class, 'store'])->name('submit-attempt');
+
+// Route::post('/submit-attempt', [AttemptController::class, 'store'])->name('submit-attempt');
 
 // Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
 // Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 
-Route::get('/robux-usd', [ConverterController::class, 'showForm']);
-Route::post('/robux-usd', [ConverterController::class, 'convert'])->name('convert');
+// Route::get('/robux-usd', [ConverterController::class, 'showForm']);
+// Route::post('/robux-usd', [ConverterController::class, 'convert'])->name('convert');
 
-Route::get('/ttk', [TtkCalculatorController::class, 'showForm']);
-Route::post('/ttk', [TtkCalculatorController::class, 'calculate'])->name('ttk.calculate');
 
 Route::prefix('tools')->group(function () {
     
+    Route::get('/ttk', [TtkCalculatorController::class, 'showForm']);
+    Route::post('/ttk', [TtkCalculatorController::class, 'calculate'])->name('ttk.calculate');
     
     Route::get('/lootdrop_simulator', [LootDropSimulatorController::class, 'showForm']);
     Route::post('/lootdrop/calculate', [LootDropSimulatorController::class, 'calculate'])->name('lootdrop.calculate');
@@ -125,17 +127,17 @@ Route::prefix('tools')->group(function () {
 
 
 // Group all API routes
-Route::prefix('api')->group(function () {
+// Route::prefix('api')->group(function () {
     
-    // Fetch today's puzzle
-    Route::get('/puzzle/today', [PuzzleController::class, 'today']);
-    Route::post('/attempts', [AttemptController::class, 'store']);
+//     // Fetch today's puzzle
+//     Route::get('/puzzle/today', [PuzzleController::class, 'today']);
+//     Route::post('/attempts', [AttemptController::class, 'store']);
 
-});
+// });
 
 
 
-Route::get('/tools', [ToolController::class, 'index']);
+// Route::get('/tools', [ToolController::class, 'index']);
 
  
 

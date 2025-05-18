@@ -173,3 +173,4 @@ function isGameOver() {
     }
     return true;
 } 
+const gameId = document.getElementById('game-id').value;

@@ -9,6 +9,8 @@ class Calculator extends Model
 {
     use HasFactory;
 
+    protected $fillable = ['slug', 'title', 'description'];
+
     protected $casts = [
         'fields' => 'array'
     ];

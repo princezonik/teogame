@@ -31,7 +31,7 @@ class ScoreUpdated implements ShouldBroadcast
     public function broadcastOn(): array
     {
         return [
-            new PrivateChannel('leaderboard'),
+            new PrivateChannel('leaderboard.' . $this->score->game_id),
         ];
     }
 

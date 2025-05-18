@@ -1,5 +1,7 @@
 <div class="flex flex-col items-center justify-center min-h-screen bg-[#faf8ef]">
     
+    <input type="hidden" id="game-id" value="{{ $game->id }}">
+
     <div class="text-center mb-4">
         <div class="flex justify-center gap-4">
             <div class="bg-[#bbada0] text-white px-4 py-2 rounded shadow-lg">
@@ -66,6 +68,30 @@
                 tipModal.classList.add("hidden");
             });
         });
+
+
+        function gameOver() {
+            const score = parseInt(document.getElementById('score').textContent);
+            const gameId = {{ $game->id }}; // Passed from Blade
+
+            fetch('/2048/score', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({
+                    score: score,
+                    game_id: gameId
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("Score submitted:", data);
+            })
+            .catch(err => console.error("Score submission failed", err));
+        }
+
     </script>
     <script src="{{ asset('js/2048.js') }}"></script>
 @endpush

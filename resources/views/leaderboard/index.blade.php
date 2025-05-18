@@ -4,32 +4,34 @@
 
 <div class="container">
 
-        <h1>Leaderboard - Top 20</h1>
-        <div id="toast" style="display: none; position: fixed; top:20px; right:20px; background: #28a745; color: white; padding:10px 20px; border-radius:5px;"></div>
-        @if($scores->isEmpty())
-            <p>No scores available yet.</p>
-        @else
-            <table id="leaderboard-table">
-                <thead>
-                    <tr>
-                        <th>Rank</th>
-                        <th>Player</th>
-                        <th>Score</th>
-                    </tr>
-                </thead>
-                
-                <tbody id="leaderboard-body">
-                    @foreach($scores as $index => $score)
-                        <tr data-user-id="{{ $score->user_id }}">
-                            <td>{{ $index + 1 }}</td>
-                            <td>{{ $score->user->name }}</td>
-                            <td>{{ $score->score }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        @endif
+    <h1>Leaderboard - Top 20</h1>
+    <div id="toast" style="display: none; position: fixed; top:20px; right:20px; background: #28a745; color: white; padding:10px 20px; border-radius:5px;">
+        
     </div>
+    @if($scores->isEmpty())
+        <p>No scores available yet.</p>
+    @else
+        <table id="leaderboard-table">
+            <thead>
+                <tr>
+                    <th>Rank</th>
+                    <th>Player</th>
+                    <th>Score</th>
+                </tr>
+            </thead>
+            
+            <tbody id="leaderboard-body">
+                @foreach($scores as $index => $score)
+                    <tr data-user-id="{{ $score->user_id }}">
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $score->user->name }}</td>
+                        <td>{{ $score->score }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
+</div>
     
 @endsection
 

@@ -25,6 +25,6 @@ class DpsTtkCalculator extends Component
     }
     public function render()
     {
-        return view('livewire.dps-ttk-calculator');
+        return view('livewire.dps-ttk-calculator',);
     }
 }

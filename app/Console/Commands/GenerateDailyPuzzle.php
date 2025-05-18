@@ -24,6 +24,8 @@ class GenerateDailyPuzzle extends Command
     public function handle()
     {
         Log::info('Running puzzle:generate with arguments: ' . json_encode($this->arguments()));
+        
+        
         $dateInput = $this->argument('date');
         $gridSize = $this->option('grid') ? max(3, (int)$this->option('grid')) : 5; // Default 5, minimum 3
 

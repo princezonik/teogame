@@ -6,8 +6,8 @@
     </p>
 
     <div class="mb-4">
-        <label class="block text-sm font-semibold mb-1">Chance per Pull (%)</label>
-        <input type="number" wire:model.live="chancePerPull w-full"
+        <label class="block text-sm font-semibold mb-1 w-full">Chance per Pull (%)</label>
+        <input type="number" wire:model.live="chancePerPull"
             class="block w-full bg-gray-800 text-white border border-gray-600 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-purple-500" step="any">
     </div>
 

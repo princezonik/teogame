@@ -11,22 +11,35 @@ use Illuminate\Support\Facades\Cache;
 
 class LeaderboardController extends Controller
 {
-   
-   
-    public function index() {
+    
+    public function index(Request $request) {
+        $gameId = $request->input('game_id');
 
         //cache the leaderboard for 5 minutes (300 seconds)
-        $scores = Cache::remember('leaderboard', 300, function(){ 
-            return Score::with('user')->select('user_id', DB::raw('MAX(score) as score'))->groupBy('user_id')->orderByDesc('score')->take(20)->get();
+        $scores = Cache::remember('leaderboard_game_{$gameId}', 300, function() use ($gameId){ 
+            return Score::with('user')
+                ->select('user_id', DB::raw('MAX(score) as score'))
+                ->groupBy('user_id')
+                ->orderByDesc('score')
+                ->take(20)
+            ->get();
         });
 
 
         // $scores = Score::with('user')->select('user_id', DB::raw('MAX(score) at score'))->groupBy('user_id')->orderByDesc('score')->take(20)->get();
         // $scores = Score::with('user')->where('game_name', 'Game1')->select('user_id', DB::raw('MAX(score) at score'))->groupBy('user_id')->orderByDesc('score')->take(20)->get();
 
+        $formatted = $scores->map(fn($s) => [
+            'user_id' => $s->user_id,
+            'user_name' => $s->user->name,
+            'score' => $s->score,
+        ]);
      
+         return response()->json(['scores' => $formatted]);
 
-        return view('leaderboard.index',compact('scores'));
+        // return view('leaderboard.index',compact('scores'));
+
+
     }
 
 

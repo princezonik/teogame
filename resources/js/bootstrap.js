@@ -19,6 +19,8 @@ window.Pusher = Pusher;
 
 Pusher.logToConsole = true;
 
+
+
 window.Echo = new Echo({
     broadcaster: 'pusher',
     key: import.meta.env.VITE_PUSHER_APP_KEY, // Load the Pusher key from your environment

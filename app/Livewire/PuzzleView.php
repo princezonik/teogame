@@ -11,7 +11,7 @@ use App\Models\PuzzleConnection;
 
 class PuzzleView extends Component
 {
-    public $game;
+    public $puzzle;
     public $gridSize;
     public $grid = [];
     public $connections = [];
@@ -20,21 +20,21 @@ class PuzzleView extends Component
     public $puzzleId;   // Declare the public property for puzzleId
 
     //To initialize the puzzle grid from the database
-    public function mount(Game $game){
+    public function mount(Puzzle $puzzle){
 
         // This method is not complete refer to it later
-       $this->game = $game;
-        $puzzle = Puzzle::inRandomOrder()->first();
+       $this->puzzle = $puzzle;
+        $game = Puzzle::inRandomOrder()->first();
         
         $this->gridSize = $puzzle->grid_size;
         $this->initializeGrid($puzzle);
     }
 
     // Initialize the grid
-    public function initializeGrid($puzzle){
+    public function initializeGrid($game){
       
         // Retrieve the cells for the grid from the database
-        $cells = PuzzleCell::where('puzzle_id', $puzzle->id)->get();
+        $cells = PuzzleCell::where('puzzle_id', $game->id)->get();
 
         // Initialize an empty grid
         $this->grid = array_fill(0, $this->gridSize, array_fill(0, $this->gridSize, null));
@@ -49,7 +49,7 @@ class PuzzleView extends Component
         }
 
         // Retrieve existing connections
-        $this->connections = PuzzleConnection::where('puzzle_id', $puzzle->id)->get();
+        $this->connections = PuzzleConnection::where('puzzle_id', $game->id)->get();
     }
 
     // Handle cell click

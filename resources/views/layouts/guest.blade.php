@@ -13,18 +13,43 @@
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        @livewireStyles
+        @stack('styles')   
     </head>
-    <body class="font-sans text-gray-900 antialiased">
-        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900">
-            <div>
-                <a href="/">
-                    <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
-                </a>
-            </div>
+    <body class="font-sans text-gray-900 antialiased" >
+        <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100 dark:bg-gray-900" style="margin: 0;  padding: 0; background-image: url('{{ asset('images/puzzleImg.jpg') }}'); background-size: cover; background-position: center; background-repeat: no-repeat;">
 
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white dark:bg-gray-800 shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>
         </div>
+
+        @livewire('footer')
+        @livewireScripts
+        @stack('scripts')
+        <!--begin::Vendors Javascript (used for this page only)-->
+        <script src="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.js') }}"></script>
+        <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/radar.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/geodata/continentsLow.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/geodata/usaLow.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZonesLow.js"></script>
+        <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZoneAreasLow.js"></script>
+        <script src="{{ asset('assets/plugins/custom/datatables/datatables.bundle.js') }}"></script>
+        <!--end::Vendors Javascript-->
+
+        <!--begin::Custom Javascript (used for this page only)-->
+        <script src="{{ asset('assets/js/widgets.bundle.js') }}"></script>
+        <script src="{{ asset('assets/js/custom/widgets.js') }}"></script>
+        <script src="{{ asset('assets/js/custom/apps/chat/chat.js') }}"></script>
+        <script src="{{ asset('assets/js/custom/utilities/modals/users-search.js') }}"></script>
+        <!--end::Custom Javascript-->
+
+        <!--end::Javascript-->
     </body>
 </html>

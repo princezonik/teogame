@@ -1,7 +1,6 @@
-
-Echo.private('leaderboard').listen('.ScoreUpdated', (e) => {
-    console.log('Score updated', e);
-    // fetchLeaderboard();
+Echo.private(`leaderboard.${game_id}`).listen('.ScoreUpdated', (e) => {
+    console.log('Score updated for game:', e.game_id);
+    fetchLeaderboard();
 });
 
 function fetchLeaderboard() {
@@ -9,8 +8,9 @@ function fetchLeaderboard() {
         method: 'POST',
         headers: {
             'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json'
-        }
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ game_id: gameId })
     })
     .then(res => res.json())
     .then(data => {

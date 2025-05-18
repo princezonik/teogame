@@ -1,6 +1,6 @@
 @extends('layouts.app')
 @section('content')
-    <div class="container">
+    <div class="container w-[550px]">
         <h1>Submit Your Score</h1>
         <form action="{{ route('scores.store') }}" method="POST" id="score-form">
             @csrf

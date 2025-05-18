@@ -9,37 +9,24 @@ class Sidebar extends Component
 {
     public $calculators;
     public $activeCalculator = null;
-    public $selectedCalculator = null;
+ 
 
     public function mount()
     {
+        logger('Loading calculators...');
         $this->calculators = Calculator::where('is_visible', true)->get();
     }
 
-    public function toggleCalculator($calculatorId)
+    public function toggleCalculator($id)
     {
-        $this->activeCalculator = $this->activeCalculator === $calculatorId ? null : $calculatorId;
+        
+        $this->activeCalculator = $this->activeCalculator === $id ? null : $id;
     }
 
-    public function showCalculator($id)
-    {
-        $this->selectedCalculator = Calculator::find($id);
-    }
-
-    public function openCalculator($slug)
-    {
-        // $this->activeCalculator = Calculator::where('slug', $slug)->first();
-        $this->activeCalculator = $slug;
-    }
-
-    public function goBack()
-    {
-        $this->selectedCalculator = null;
-    }
-
+   
     public function render()
     {
         
-        return view('livewire.sidebar', ['calculators' => Calculator::all(),]);
+        return view('livewire.sidebar', ['calculators' => $this->calculators, 'activeCalculator' => $this->activeCalculator]);
     }
 }

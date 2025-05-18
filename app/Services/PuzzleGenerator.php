@@ -29,7 +29,7 @@ class PuzzleGenerator
         $seed = (int) $date->format('Ymd');
         mt_srand($seed);
 
-        $maxAttempts = 10; // Limit regeneration attempts
+        $maxAttempts = 50; // Limit regeneration attempts
         $attempt = 0;
 
         do {

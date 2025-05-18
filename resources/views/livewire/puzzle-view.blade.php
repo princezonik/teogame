@@ -1,4 +1,4 @@
-<div class="p-4">
+<div class="flex flex-col items-center">
     <div class="grid" style="grid-template-columns: repeat({{ $gridSize }}, 3rem); display: grid; gap: 0.25rem;">
         @foreach ($grid as $rowIndex => $row)
             @foreach ($row as $colIndex => $cell)

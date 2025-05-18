@@ -7,6 +7,6 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 });
 
 
-Broadcast::channel('leaderboard', function ($user) {
+Broadcast::channel('leaderboard.{gameId}', function ($user, $gameId) {
     return $user;
 });
