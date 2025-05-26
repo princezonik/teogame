@@ -9,9 +9,6 @@ window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
  * allow your team to quickly build robust real-time web applications.
  */
 
-
-
-
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
@@ -27,4 +24,10 @@ window.Echo = new Echo({
     cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER, // Load the Pusher cluster from your environment
     authEndpoint: '/broadcasting/auth',
     forceTLS: true,
+    auth: {
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    }
+    
 });

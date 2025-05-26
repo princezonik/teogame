@@ -33,8 +33,11 @@ class ScoreSeeder extends Seeder
         foreach ($games as $game) {
             Score::create([
                 'user_id' => $user->id,
-                'game_id' => $game->id,  // Assign score for the specific game
-                'score' => rand(100, 1000)  // Random score between 100 and 1000
+                'game_id' => $game->id,  
+                'score' => rand(100, 1000),  
+                'moves' => rand(40, 150),
+                'best_moves' => rand(30, 50),
+                'time' => 300,
             ]);
         }
     }

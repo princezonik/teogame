@@ -8,6 +8,10 @@ use App\Models\PuzzleCell;
 use App\Models\PuzzleConnection;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
+use App\Models\Score;
+use App\Models\Game;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cookie;
 
 class TeogamePuzzle extends Component
 {
@@ -19,14 +23,22 @@ class TeogamePuzzle extends Component
     public $connections;
     public $userPaths = [];
     public $isCompleted = false;
+    public $moves = 0;
+    public $bestMoves = null;
+    
 
-    protected $listeners = ['updatePath' => 'updateUserPath', 'resetPuzzle' => 'resetPuzzle'];
-
-    public function mount($date = null)
+    protected $listeners = ['updatePath' => 'updateUserPath', 'resetPuzzle' => 'resetPuzzle', 'move-made' => 'incrementMoves', 'game-completed' => 'handleCompletion'];
+    
+    public function mount($date = null, $puzzle = null)
     {
-        $this->date = $date ?? Carbon::today()->toDateString();
+        $this->date = $date ?? Carbon::tomorrow()->toDateString();
+        $this->puzzle = $puzzle ?? Puzzle::where('date', $this->date)->first();
+    
         $this->loadPuzzle();
+        // $this->loadBestMoves();
+       
     }
+    
 
     public function loadPuzzle()
     {
@@ -86,6 +98,72 @@ class TeogamePuzzle extends Component
         $this->checkCompletion();
     }
 
+    protected function loadBestMoves()
+    {
+        if (Auth::check()) {
+            $record = Score::firstOrCreate([
+                'user_id' => Auth::id(),
+                'game_id' => $this->game->id
+            ]);
+            $this->bestMoves = $record->best_moves;
+        } else {
+            $this->bestMoves = json_decode(Cookie::get('game_best_moves'), true)[$this->game->id] ?? null;
+        }
+    }
+    
+    public function incrementMoves()
+    {
+        $this->moves++;
+    }
+    
+    public function handleCompletion()
+    {
+        $this->isCompleted = true;
+        
+        if (Auth::check()) {
+            $this->saveAuthenticatedRecord();
+        } else {
+            $this->saveGuestRecord();
+        }
+    }
+    
+    protected function saveAuthenticatedRecord()
+    {
+        $record = Score::updateOrCreate(
+            ['user_id' => Auth::id(), 'game_id' => $this->game->id],
+            [
+                'moves' => $this->moves,
+                'best_moves' => $this->calculateBestMoves()
+            ]
+        );
+        
+        $this->bestMoves = $record->best_moves;
+    }
+    
+    protected function saveGuestRecord()
+    {
+        $bestMoves = json_decode(Cookie::get('game_best_moves'), true) ?? [];
+        $currentBest = $bestMoves[$this->game->id] ?? null;
+        
+        if ($currentBest === null || $this->moves < $currentBest) {
+            $bestMoves[$this->game->id] = $this->moves;
+            Cookie::queue('game_best_moves', json_encode($bestMoves), 60*24*365); // 1 year
+            $this->bestMoves = $this->moves;
+        }
+    }
+    
+    protected function calculateBestMoves()
+    {
+        $currentBest = Score::where('user_id', Auth::id())
+                        ->where('game_id', $this->game->id)
+                        ->value('best_moves');
+        
+        return ($currentBest === null || $this->moves < $currentBest) 
+            ? $this->moves 
+            : $currentBest;
+    }
+    
+
     public function checkCompletion()
     {
         foreach ($this->connections as $color => $connection) {
@@ -128,13 +206,19 @@ class TeogamePuzzle extends Component
         $this->isCompleted = true;
         $this->dispatch('puzzle-completed');
     }
-
     
     public function resetPuzzle()
     {
+        
+        // Preserve the original cells data
         $this->userPaths = [];
         $this->isCompleted = false;
-        $this->dispatch('puzzle-reset');
+        
+        // Re-emit the initial puzzle data
+        $this->dispatch('puzzle-reset', [
+            'cells' => $this->cells,
+            'connections' => $this->connections
+        ]);
     }
     public function render()
     {

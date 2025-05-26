@@ -1,4 +1,4 @@
-console.log('Loading puzzle-game.js');
+
 document.addEventListener('alpine:init', () => {
     console.log('Alpine:init triggered, registering puzzleGame');
     Alpine.data('puzzleGame', (puzzle) => ({
@@ -184,3 +184,89 @@ document.addEventListener('alpine:init', () => {
         }
     }));
 });
+
+
+function puzzleGame() {
+    return {
+        moves: 0,
+        bestMoves: null,
+        isCompleted: false,
+        
+        init() {
+            this.bestMoves = this.getStoredBestMoves();
+            window.addEventListener('beforeunload', () => this.storeGuestProgress());
+        },
+        
+        incrementMoves() {
+            this.moves++;
+            this.$dispatch('move-made');
+        },
+
+         // Called whenever user makes a valid move
+        handleMove() {
+            this.moves++;
+            this.$wire.incrementMoves();
+        }
+        // completeGame() {
+        //     this.isCompleted = true;
+        //     // this.$dispatch('game-completed');
+            
+        //     // Update best moves if current is better
+        //     if (this.bestMoves === null || this.moves < this.bestMoves) {
+        //         this.bestMoves = this.moves;
+        //         this.storeBestMoves();
+        //     }
+        // },
+
+        // Called when puzzle is solved
+        handleGameComplete() {
+            this.isCompleted = true;
+            this.$wire.completeGame();
+            
+            // Update best moves if needed
+            if (this.bestMoves === null || this.moves < this.bestMoves) {
+                this.bestMoves = this.moves;
+                this.$wire.call('updateBestMoves', this.bestMoves);
+            }
+            
+            // Show completion modal
+            this.showCompletionModal = true;
+        },
+        
+        getStoredBestMoves() {
+            if (@json(auth()->check())) return null;
+            
+            const cookieValue = document.cookie
+                .split('; ')
+                .find(row => row.startsWith('game_best_moves='))
+                ?.split('=')[1];
+                
+            return cookieValue ? JSON.parse(cookieValue)[@json($game->id)] : null;
+        },
+        
+        storeBestMoves() {
+            if (@json(auth()->check())) return;
+            
+            const current = JSON.parse(localStorage.getItem('game_best_moves') || {});
+            current[@json($game->id)] = this.bestMoves;
+            localStorage.setItem('game_best_moves', JSON.stringify(current));
+            
+            // Also set cookie for server-side access
+            document.cookie = `game_best_moves=${JSON.stringify(current)}; path=/; max-age=${60*60*24*365}`;
+        },
+        
+        storeGuestProgress() {
+            if (!this.isCompleted && @json(!auth()->check())) {
+                localStorage.setItem('game_current_progress', JSON.stringify({
+                    gameId: @json($game->id),
+                    moves: this.moves
+                }));
+            }
+        },
+        
+        resetGame() {
+            this.moves = 0;
+            this.isCompleted = false;
+        }
+    };
+}

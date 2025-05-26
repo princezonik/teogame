@@ -1,22 +1,36 @@
 <div class="max-w-2xl mx-auto p-4">
     @if (session('error'))
         <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            {{ session('error') }}
+            {{ session('error') }} 
         </div>
     @endif
 
+
+     <!-- Moves counter -->
+    <div class="flex justify-between items-center mb-4">
+        <div class="text-lg font-semibold">
+            Moves: <span x-text="moves" class="text-blue-600"></span>
+        </div>
+        
+        <template x-if="bestMoves !== null">
+            <div class="text-lg font-semibold">
+                Best: <span x-text="bestMoves" class="text-green-600"></span>
+            </div>
+        </template>
+    </div>
+
+   
     @if ($puzzle)
         <div wire:ignore.self>
             <div x-data="puzzleBoard({
-                gridSize: {{ $gridSize ?? 5 }},
+                {{-- gridSize: {{ $gridSize ?? 5 }}, --}}
                 cells: @js($cells),
                 connections: @js($connections),
                 userPaths: @js((object)$userPaths),
                 isCompleted: {{ $isCompleted ? 'true' : 'false' }}
             })" x-init="init()" 
-                @puzzle-completed.window="$wire.markAsCompleted()"
-                @puzzle-reset.window="$wire.resetPuzzle()" class="relative">
-                
+           
+               
                 <!-- SVG Grid -->
                 <svg :width="gridSize * 50 + 2" :height="gridSize * 50 + 2" class="border border-gray-300 mx-auto">
                     <!-- Grid Lines -->
@@ -35,7 +49,7 @@
                 </svg>
 
                 <!-- Success Message -->
-                <div x-show="isCompleted" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-500">
+                {{-- <div x-show="isCompleted" class="absolute inset-0 flex items-center justify-center bg-black bg-opacity-50 transition-opacity duration-500">
                     <div class="bg-green-500 text-white p-6 rounded-lg shadow-lg animate-bounce">
                         <h2 class="text-2xl font-bold">Congratulations!</h2>
                         <p>You've completed the puzzle!</p>
@@ -43,7 +57,9 @@
                             Play Again
                         </button>
                     </div>
-                </div>
+                </div> --}}
+
+                
 
                 <!-- Controls -->
                 <div class="mt-4 flex justify-center">

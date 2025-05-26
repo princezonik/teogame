@@ -7,6 +7,8 @@ use App\Models\Game;
 use App\Livewire\Games;
 use App\Models\Score;
 use Illuminate\Support\Facades\Auth;
+use App\Services\DailyGameService;
+
 
 class GameController extends Controller
 {
@@ -15,6 +17,13 @@ class GameController extends Controller
         $games = Game::all(); 
 
         return view('games.index', compact('games'));
+    }
+
+    public function daily(DailyGameService $dailyGame)
+    {
+        $game = $dailyGame->getDailyGame();
+        
+        return view('games.daily', compact('game'));
     }
 
     public function show($id)
@@ -41,7 +50,5 @@ class GameController extends Controller
         broadcast(new \App\Events\ScoreUpdated($request->game_id));
 
         return response()->json(['message' => 'Score saved']);
-    }
-   
-   
+    } 
 }

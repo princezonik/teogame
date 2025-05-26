@@ -13,13 +13,41 @@ class Leaderboard extends Component
 
     public $scores;
 
+    protected $listeners = ['echo-private:leaderboard.*,ScoreUpdated' => 'updateScoreFromBroadcast',];
+
     public function mount()
     {
-        // $this->scores = Score::orderBy('value', 'desc')->take(10)->get();
-         //cache the leaderboard for 5 minutes (300 seconds)
-        $this->scores = Cache::remember('leaderboard', 300, function(){ 
-            return Score::with('user')->select('user_id', DB::raw('MAX(score) as score'))->groupBy('user_id')->orderByDesc('score')->take(20)->get();
+        $this->scores = Cache::remember('leaderboard', 300, function () {
+            return Score::with('user')->whereIn('id', function ($query) {
+                $query->selectRaw('MAX(id)')->from('scores')->groupBy('user_id');
+            })
+            ->orderByDesc('score')
+            ->take(20)
+            ->get()
+            ->map(function ($score) {
+                return [
+                    'user_id'    => $score->user_id,
+                    'user_name'  => $score->user->name ?? 'Unknown',
+                    'score'      => $score->score,
+                ];
+            })
+            ->toArray();
         });
+    }
+
+    public function updateScoreFromBroadcast(array $data)
+    {
+        // Remove old entry for the user
+        $this->scores = collect($this->scores)->reject(fn ($entry) => $entry['user_id'] === $data['user_id'])
+            ->push([
+                'user_id'   => $data['user_id'],
+                'user_name' => $data['user_name'],
+                'score'     => $data['score'],
+            ])
+            ->sortByDesc('score')
+            ->take(20)
+            ->values()
+            ->toArray();
     }
 
     // public function index() {
@@ -36,12 +64,6 @@ class Leaderboard extends Component
     // }
     public function render()
     {
-        // $leaders = Attempt::whereHas('puzzle', fn($q) => $q->whereDate('date', today()))
-        //     ->with('user')
-        //     ->orderBy('time_ms')
-        //     ->limit(10)
-        //     ->get();
-
         return view('livewire.leaderboard', ['scores' => $this->scores]);
     }
 }

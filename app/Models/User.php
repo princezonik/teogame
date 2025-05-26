@@ -53,6 +53,11 @@ class User extends Authenticatable
     public function scores(){
         return $this->hasMany(Score::class);
     }
+
+    public function games()
+    {
+        return $this->hasManyThrough(Game::class, Score::class);
+    }
     // public function getAvatarUrlAttribute()
     // {
     //     // Example if avatar path is stored in DB

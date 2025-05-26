@@ -1,60 +1,69 @@
-Echo.private(`leaderboard.${game_id}`).listen('.ScoreUpdated', (e) => {
-    console.log('Score updated for game:', e.game_id);
-    fetchLeaderboard();
-});
+window.initializeEcho = function() {
+    const gameId = window.gameId || null;
+    if (gameId) {
+        console.log('Subscribing to leaderboard.' + gameId);
+        window.Echo.private(`leaderboard.${gameId}`)
+            .listen('.ScoreUpdated', (e) => {
+                console.log('Score updated for game:', e.game_id, 'difficulty:', e.difficulty);
+                fetchLeaderboard(gameId, e.difficulty);
+            });
+    } else {
+        console.warn('window.gameId is undefined, skipping game-specific leaderboard subscription');
+    }
 
-function fetchLeaderboard() {
-    fetch('/leaderboard/refresh', {
+    window.Echo.private('leaderboard')
+        .listen('.ScoreUpdated', (event) => {
+            console.log('Global leaderboard update');
+            fetchLeaderboard(gameId);
+        });
+};
+
+
+function fetchLeaderboard(gameId, difficulty = null) {
+
+    const url = '/leaderboard/refresh';
+    const params = new URLSearchParams({ game_id: gameId });
+    
+    if (difficulty) {
+        params.append('difficulty', difficulty);
+    }
+
+    fetch(`${url}?${params.toString()}`, {
         method: 'POST',
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ game_id: gameId })
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+        }
     })
-    .then(res => res.json())
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
     .then(data => {
         updateLeaderboardDOM(data.scores);
+    })
+    .catch(error => {
+        console.error('Error refreshing leaderboard:', error);
     });
 }
 
-// Laravel Echo listens for ScoreUpdated events
-Echo.private('leaderboard').listen('.ScoreUpdated', (event) => {
-    // Fetch updated leaderboard from server
-    fetch('/leaderboard/refresh').then(response => response.json()).then(data => {
-        updateLeaderboard(data.scores);
-    });
-});
-
-// Function to update the leaderboard table
 function updateLeaderboardDOM(scores) {
-    const table = document.querySelector('#leaderboard-table tbody');
-    
-    // Clear the existing rows in the table body
-    table.innerHTML = '';
-
-    // Use a fragment to build the rows in memory
-    const fragment = document.createDocumentFragment();
-
-    // Loop through the scores and create table rows
-    scores.forEach(score => {
-        const row = document.createElement('tr');
-        
-        const userNameCell = document.createElement('td');
-        userNameCell.textContent = score.user_name;
-        
-        const scoreCell = document.createElement('td');
-        scoreCell.textContent = score.score;
-
-        // Append the cells to the row
-        row.appendChild(userNameCell);
-        row.appendChild(scoreCell);
-
-        // Append the row to the fragment (in memory)
-        fragment.appendChild(row);
-    });
-
-    // Append the entire fragment to the table at once
-    table.appendChild(fragment);
+    const tableBody = document.querySelector('#leaderboard-table tbody');
+    tableBody.innerHTML = scores.map(score => `
+        <tr>
+            <td class="p-2">${score.user_name}</td>
+            <td class="p-2">${score.score}</td>
+            <td class="p-2">${score.best_moves || 'N/A'}</td>
+        </tr>
+    `).join('');
 }
 
+function handleResponse(response) {
+    if (!response.ok) throw new Error('Network response was not ok');
+    return response.json();
+}
+
+function handleError(error) {
+    console.error('Leaderboard fetch failed:', error);
+}

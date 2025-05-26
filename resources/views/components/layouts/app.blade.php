@@ -8,21 +8,20 @@
 
         <title>@yield('title', 'Home') - {{ config('app.name', 'TeoGame') }}</title>
         
-		@vite(['resources/css/app.css', 'resources/js/app.js'])
-
+        
         {{-- Global Styles --}}
         <link rel="stylesheet" href="{{ asset('assets/plugins/global/plugins.bundle.css') }}" />
         <link rel="stylesheet" href="{{ asset('assets/css/style.bundle.css') }}" />
 		<link href="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.css" rel="stylesheet" type="text/css')}}" />
 		<link href="{{ asset('assets/plugins/custom/datatables/datatables.bundle.css" rel="stylesheet" type="text/css')}}" />
-		<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Inter:300,400,500,600,700" />
-
+        
 
         {{-- Page Specific Styles --}}
         
         {{-- Favicon (optional) --}}
         <link rel="shortcut icon" href="{{ asset('assets/media/logos/favicon.ico') }}" />
         @livewireStyles
+		@vite(['resources/css/app.css', 'resources/js/app.js'])
         @stack('styles')
     </head>
 
@@ -34,8 +33,13 @@
 
 	
 		
-    {{-- @livewire('footer') --}}
-        <!--begin::Javascript-->
+    @livewire('footer')
+        
+    
+    
+    
+    
+    <!--begin::Javascript-->
         {{-- <script>var hostUrl = "{{ asset('assets') }}/";</script> --}}
 
         <!--begin::Global Javascript Bundle (mandatory for all pages)-->
@@ -54,8 +58,6 @@
         <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZonesLow.js"></script>
         <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZoneAreasLow.js"></script> 
         <!--end::Vendors Javascript-->
-		@livewireScripts
-        @stack('scripts')
         {{-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> --}}
         <!--begin::Custom Javascript (used for this page only)-->
 		<script src="{{ asset('assets/plugins/custom/fullcalendar/fullcalendar.bundle.js') }}"></script>
@@ -69,7 +71,24 @@
         <!--end::Custom Javascript-->
 
         <!--end::Javascript-->
-       
+
+        
+        @stack('scripts')
+        @livewireScripts
+        {{-- <script>
+            // Initialize game data with Livewire
+            document.addEventListener('livewire:init', () => {
+                Livewire.on('gameReady', (gameId) => {
+                    window.gameId = gameId; // Make sure this is set
+                    console.log('Game ID set:', window.gameId);
+                    
+                    // Reinitialize Echo with the proper gameId
+                    if (typeof initializeEcho === 'function') {
+                        initializeEcho();
+                    }
+                });
+            });
+        </script> --}}
     </body>
 	<!--end::Body-->
 </html>

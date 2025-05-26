@@ -1,4 +1,36 @@
-<div class="flex flex-col items-center justify-center min-h-screen bg-[#faf8ef]">
+<div x-data{
+        score: 0,
+        moves: 0,
+        gameId: {{ $gameId }},
+        isAuthenticated: {{ $isAuthenticated ? 'true' : 'false' }},
+        init() {
+            if (!this.isAuthenticated) {
+                // Load score from localStorage for unauthenticated users
+                const saved = localStorage.getItem('game_' + this.gameId + '_score');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    this.score = data.score || 0;
+                    this.moves = data.moves || 0;
+                }
+            }
+        },
+        updateScore(score, moves) {
+            this.score = score;
+            this.moves = moves;
+            if (!this.isAuthenticated) {
+                localStorage.setItem('game_' + this.gameId + '_score', JSON.stringify({
+                    score: this.score,
+                    moves: this.moves
+                }));
+            } else {
+
+                @this.updateScore(this.score, this.moves);
+            }
+        },
+    }
+
+    class="flex flex-col items-center justify-center min-h-screen bg-[#faf8ef]"
+    >
     
     <input type="hidden" id="game-id" value="{{ $game->id }}">
 
@@ -38,16 +70,9 @@
     </div>
 
     <div class="mt-4 flex gap-2">
-        <button onclick="newGame()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">New Game</button>
+        <button onclick="newGame()"  x-on:click="updateScore(score + 10, moves + 1)" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">New Game</button>
         <button onclick="undoMove()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Undo</button>
         <button onclick="replayGame()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Replay</button>
-    </div>
-
-
-    <div class="max-w-4xl mx-auto flex flex-col gap-4 mt-10 p-4 bg-slategray text-[#9fa0a0] shadow-lg">
-        <div><h1>{{$game->title}} Description</h1></div>
-        <div>{{$game->description}}</div>
-
     </div>
 </div>
 
@@ -95,8 +120,6 @@
     </script>
     <script src="{{ asset('js/2048.js') }}"></script>
 @endpush
-
-
 
 @push('styles')
     <style>

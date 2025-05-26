@@ -3,60 +3,140 @@
 namespace App\Livewire;
 
 use App\Models\Game;
+use App\Models\Score;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
+use Illuminate\Support\Facades\DB;
+use App\Events\ScoreUpdated;
 
 class SlidingPuzzle extends Component
 {
-
     public $game;
+    public $leaderboard = [];
+    public $bestMoves = null;
+    
 
-    // The mount method will load the game
-    public function mount(Game $game)
+    protected $listeners = ['puzzleSolved'];
+
+    public function mount($game)
     {
-        $this->game = $game;
+        // Handle $game as Game instance, array, or ID
+        $this->game = $game instanceof Game ? $game : Game::find($game['id'] ?? $game ?? null);
+
+        if (!$this->game) {
+            Log::error('Invalid game provided to SlidingPuzzle', ['game' => $game]);
+            $this->game = new Game(); // Fallback
+        }
+
+        $this->loadLeaderboard();
+        $this->loadBestMoves();
     }
 
-    // public array $tiles = [];
+    public function puzzleSolved($moves, $time, $difficulty, $game_id, $timestamp)
+    {
+        if (!Auth::check()) {
+            Log::info('Non-authenticated user completed puzzle, skipping DB save', ['data' => $data]);
+            return;
+        }
 
-    // public function mount()
-    // {
-    //     $this->generateSolvablePuzzle();
-    // }
+        $data = [
+            'moves' => $moves,
+            'time' => $time,
+            'difficulty' => $difficulty,
+            'game_id' => $game_id,
+            'timestamp' => $timestamp,
+        ];
 
-    // public function generateSolvablePuzzle()
-    // {
-    //     do {
-    //         $this->tiles = collect(range(0, 8))->shuffle()->toArray();
-    //     } while (!$this->isSolvable($this->tiles));
-    // }
+        // Validate data
+        $validated = validator($data, [
+            'moves' => 'required|integer|min:0',
+            'time' => 'required|integer|min:0',
+            'difficulty' => 'nullable|integer|min:3',
+            'game_id' => 'required|exists:games,id',
+            'timestamp' => 'required|date',
+        ])->validate();
 
-    // public function move($index)
-    // {
-    //     $emptyIndex = array_search(0, $this->tiles);
-    //     if ($this->isAdjacent($index, $emptyIndex)) {
-    //         [$this->tiles[$index], $this->tiles[$emptyIndex]] = [$this->tiles[$emptyIndex], $this->tiles[$index]];
-    //     }
-    // }
+        if ($validated['game_id'] != $this->game->id) {
+            Log::error('Game ID mismatch', ['received' => $validated['game_id'], 'expected' => $this->game->id]);
+            return;
+        }
 
-    // private function isAdjacent($a, $b)
-    // {
-    //     $rowA = intdiv($a, 3); $colA = $a % 3;
-    //     $rowB = intdiv($b, 3); $colB = $b % 3;
-    //     return abs($rowA - $rowB) + abs($colA - $colB) === 1;
-    // }
+        try {
+            $score = Score::updateOrCreate(
+                [
+                    'user_id' => Auth::id(),
+                    'game_id' => $this->game->id,
+                ],
+                [
+                    'score' => $this->calculateScore($validated['moves'], $validated['time'], $validated['difficulty'] ?? 3),
+                    'best_moves' => DB::raw('LEAST(COALESCE(best_moves, 999999), ' . $validated['moves'] . ')'),
+                    'difficulty' => $validated['difficulty'],
+                    'moves' => $validated['moves'],
+                    'time' => $validated['time'],
+                ]
+            );
 
-    // private function isSolvable($tiles)
-    // {
-    //     $inv = 0;
-    //     for ($i = 0; $i < 9; $i++) {
-    //         for ($j = $i + 1; $j < 9; $j++) {
-    //             if ($tiles[$i] && $tiles[$j] && $tiles[$i] > $tiles[$j]) {
-    //                 $inv++;
-    //             }
-    //         }
-    //     }
-    //     return $inv % 2 === 0;
-    // }
+            Log::info('Score saved successfully', $score->toArray());
+
+            // Broadcast event
+            event(new ScoreUpdated($score));
+
+            // Update UI
+            $this->loadLeaderboard();
+            $this->loadBestMoves();
+            $this->dispatch('update-best-moves', ['bestMoves' => $score->best_moves]);
+            $this->dispatch('scoreSaved', ['message' => 'Score saved successfully']);
+
+        } catch (\Exception $e) {
+            Log::error('Score save error', ['error' => $e->getMessage(), 'data' => $data]);
+            $this->dispatch('show-error', ['message' => 'Failed to save score']);
+        }
+    }
+
+    
+    private function calculateScore($moves, $time, $difficulty)
+    {
+        $baseScore = 1000;
+        $difficultyMultiplier = ($difficulty ?? 3) / 3; // Default to 3 if null
+        return max(100, $baseScore - ($moves * 10 * $difficultyMultiplier + $time));
+    }
+
+    public function loadLeaderboard()
+    {
+        try {
+            $this->leaderboard = Score::with('user')
+                ->where('game_id', $this->game->id)
+                ->orderBy('score', 'desc')
+                ->limit(10)
+                ->get()
+                ->map(function ($score) {
+                    return [
+                        'user_name' => $score->user->name ?? 'Unknown',
+                        'score' => $score->score,
+                        'best_moves' => $score->best_moves,
+                        'time' => $score->time,
+                        'difficulty' => $score->difficulty,
+                    ];
+                })
+                ->toArray();
+
+            Log::info('Leaderboard loaded', ['leaderboard' => $this->leaderboard]);
+        } catch (\Exception $e) {
+            Log::error('Failed to load leaderboard', ['error' => $e->getMessage()]);
+            $this->leaderboard = [];
+        }
+    }
+
+    public function loadBestMoves()
+    {
+        if (Auth::check()) {
+            $score = Score::where('user_id', Auth::id())
+                ->where('game_id', $this->game->id)
+                ->first();
+            $this->bestMoves = $score->best_moves ?? null;
+        }
+    }
 
     public function render()
     {

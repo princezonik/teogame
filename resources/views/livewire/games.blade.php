@@ -1,14 +1,48 @@
-<div class="p-6  min-h-screen text-white">
 
-    <div class="max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        @foreach ($games as $game)
-            <a href="{{ route('games.show', $game->id) }}" class="block bg-[#363D44]  hover:shadow-lg transition">
-                <img src="{{ asset($game->image) }}" alt="{{ $game->title }}" class="w-full h-[12.5rem] object-cover ">
-                <div class="font-semibold truncate bg-[#42484E] p-1">{{ $game->title }}</div>
-                <p class="text-sm text-gray-400 px-1 pt-1 bg-[#363d44] line-clamp-3">{{ $game->description }}</p></a>
-        @endforeach
+<div class="p-6 min-h-screen text-white"
+    x-data="{
+        loading: true,
+        init() {
+            // Call Livewire method from Alpine
+            this.$wire.loadGame('{{ $games->slug ?? '' }}');
+            
+            this.$wire.on('game-loaded', (payload) => {
+                window.gameId = payload.gameId;
+                window.currentGameSlug = payload.slug;
 
-    </div>
+                if (typeof initializeEcho === 'function') {
+                    initializeEcho();
+                }
 
-    @livewire('teogame-puzzle')
+                this.loading = false;
+            });
+
+            this.$wire.on('setGameId', (payload) => {
+                window.gameId = payload.gameId;
+                window.currentGameSlug = payload.slug;
+                console.log('setGameId received:', payload);
+                if (typeof initializeEcho === 'function') {
+                    initializeEcho();
+                }
+            });
+        }
+    }"
+>
+
+    @if($games)
+        
+        <!-- Loading state -->
+        <div x-show="loading" class="text-center py-8">
+            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
+            <p class="mt-2">Loading game...</p>
+        </div>
+
+        <!-- Game content -->
+        <div x-show="!loading" class="bg-[#192440] transition-opacity duration-300">
+            @livewire($games->slug, ['game' => $games], key($games->id))
+        </div>
+    
+    @else
+        <p class="text-center py-8">No game available today.</p>
+    @endif
 </div>

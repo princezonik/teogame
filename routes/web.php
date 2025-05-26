@@ -53,6 +53,7 @@ Route::get('/calculator/{slug}', [CalculatorController::class, 'show'])->name('c
 //Auth middleware
 
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', function () { return view('dashboard')->name('dashboard'); }
     Route::post('/scores', [ScoreController::class, 'store'])->name('scores.store');
     Route::get('/leaderboard', [LeaderboardController::class, 'index'])->name('leaderboard.index');
     Route::post('/leaderboard/refresh', [LeaderboardController::class, 'refresh'])->name('leaderboard.refresh');
@@ -65,9 +66,6 @@ Route::middleware('auth')->group(function () {
     })->name('scores.create');
 });
     
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
 
 
 // Route::get('/dashboard', function () { 
@@ -87,11 +85,11 @@ Route::post('/2048/score', [GameController::class, 'store2048Score']);
 // Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 
-// Route::get('/robux-usd', [ConverterController::class, 'showForm']);
-// Route::post('/robux-usd', [ConverterController::class, 'convert'])->name('convert');
-
 
 Route::prefix('tools')->group(function () {
+    
+    Route::get('/robux-usd', [ConverterController::class, 'showForm']);
+    Route::post('/robux-usd', [ConverterController::class, 'convert'])->name('convert');
     
     Route::get('/ttk', [TtkCalculatorController::class, 'showForm']);
     Route::post('/ttk', [TtkCalculatorController::class, 'calculate'])->name('ttk.calculate');

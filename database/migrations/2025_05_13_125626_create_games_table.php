@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('title');
             $table->string('image');
             $table->text('description');
+            $table->string('slug')->unique();
+            $table->string('type')->default('puzzle');
+            $table->boolean('tracks_time')->default(false);
+            $table->boolean('tracks_moves')->default(false);
             $table->timestamps();
         });
     }

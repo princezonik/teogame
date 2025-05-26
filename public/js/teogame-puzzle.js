@@ -11,9 +11,32 @@ function puzzleBoard(data) {
         animationFrame: null,
 
         init() {
-            this.renderAll();
+            this.originalCells = JSON.parse(JSON.stringify(data.cells));
+            this.resetState();
             this.setupEventListeners();
+            this.isCompleted = false;
         },
+
+        resetState() {
+            this.userPaths = {};
+            this.isCompleted = false;
+            this.drawing = null;
+            this.lastPoint = null;
+            this.tempPath = null;
+            this.cells = JSON.parse(JSON.stringify(this.originalCells));
+            this.renderAll();
+        },
+        
+        // renderAll() {
+        //     // Clear only paths, preserve cells
+        //     this.$refs.pathsGroup.innerHTML = '';
+        //     this.renderPaths();
+            
+        //     // Cells should persist, only update if missing
+        //     if (this.$refs.cellsGroup.children.length === 0) {
+        //         this.renderCells();
+        //     }
+        // },
 
         renderAll() {
             this.renderCells();
@@ -252,6 +275,7 @@ function puzzleBoard(data) {
         },
 
         resetPuzzle() {
+            this.moves = 0;
             this.userPaths = {};
             this.isCompleted = false;
             this.drawing = null;
@@ -266,3 +290,6 @@ function puzzleBoard(data) {
         }
     };
 }
+
+
+

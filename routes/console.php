@@ -7,30 +7,22 @@ use Illuminate\Support\Facades\Schedule;
 use App\Services\PuzzleGenerator;
 use Illuminate\Support\Facades\Log;
 use App\Console\Commands\GenerateDailyPuzzle;
+use App\Console\Commands\CacheDailyGame;
 
 
 Artisan::command('inspire', function () {
     $this->comment(Inspiring::quote());
 })->purpose('Display an inspiring quote');
 
-// 1) Define the Artisan command
-// Artisan::command('app:generate-daily-puzzle', function () {
-//     $generator = new PuzzleGenerator();
-//     $puzzle   = $generator->generate(5, 3);
-//     $this->info("Generated puzzle #{$puzzle->id}");
-// })->describe('Generate the daily Path‑Connect puzzle');
+       
 
-// // 2) Schedule it at midnight UTC
-// Schedule::command('app:generate-daily-puzzle')
-//         ->everyMinute()
-//         ->timezone('UTC')
-//         ->onSuccess(fn() => Log::info('Daily puzzle job succeeded.'))
-//         ->onFailure(fn() => Log::error('Daily puzzle job failed.'));
-
+//generate 5x5 Teogame freeflow like puzzle
 Schedule::command(GenerateDailyPuzzle::class)
-    ->dailyAt('00:00')
-    ->timezone('UTC');
+    ->dailyAt(0.00)
+    ->timezone('UTC')
+    ->onSuccess(fn() => Log::info('Daily puzzle job succeeded.'))
+->onFailure(fn() => Log::error('Daily puzzle job failed.'));
 
-// Schedule::command('puzzle:generate')->everyMinute();
 
-
+//Daily game switcher
+Schedule::command(CacheDailyGame::class)->dailyAt('00:00');

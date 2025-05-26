@@ -11,9 +11,9 @@
         
     </div>
 
-    @if($scores->isEmpty())
+    {{-- @if($scores->isEmpty())
         <p>No scores available yet.</p>
-    @else
+    @else --}}
         <table id="leaderboard-table" class=" " style="width: 300px">
             <thead>
                 <tr class="">
@@ -22,18 +22,25 @@
                     <th>Score</th>
                 </tr>
             </thead>
+
+            {{-- @foreach ($leaderboard as $entry)
+                    <tr>
+                        <td class="p-2">{{ $entry['user_name'] }}</td>
+                        <td class="p-2">{{ $entry['score'] }}</td>
+                    </tr>
+                @endforeach --}}
             
             <tbody id="leaderboard-body" class="text-white">
                 @foreach($scores as $index => $score)
-                    <tr data-user-id="{{ $score->user_id }}">
-                        <td>{{ $index + 1 }}</td>
-                        <td>{{ $score->user->name }}</td>
-                        <td>{{ $score->score }}</td>
-                    </tr>
-                @endforeach
+        <tr data-user-id="{{ $score['user_id'] }}">
+            <td>{{ $index + 1 }}</td>
+            <td>{{ $score['user_name'] }}</td>
+            <td>{{ $score['score'] }}</td>
+        </tr>
+    @endforeach
             </tbody>
         </table>
-    @endif
+    {{-- @endif --}}
 </div>
 </div>
 @push('styles')

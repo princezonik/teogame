@@ -13,29 +13,54 @@ class LeaderboardController extends Controller
 {
     
     public function index(Request $request) {
+
+
+        $request->validate([
+            'game_id' => 'required|integer|exists:games,id',
+            'difficulty' => 'nullable|integer|min:3|max:5' 
+        ]);
         $gameId = $request->input('game_id');
+        $difficulty = $request->input('difficulty');
+
+        $cacheKey = "leaderboard:game:{$gameId}" . ($difficulty ? ":difficulty:{$difficulty}" : '');    
+
 
         //cache the leaderboard for 5 minutes (300 seconds)
-        $scores = Cache::remember('leaderboard_game_{$gameId}', 300, function() use ($gameId){ 
-            return Score::with('user')
-                ->select('user_id', DB::raw('MAX(score) as score'))
+        $scores = Cache::remember($cacheKey, now()->addMinutes(5), function() use ($gameId, $difficulty){ 
+
+
+            $query = Score::with('user')
+                ->where('game_id', $gameId)
+                ->select('user_id', DB::raw('MAX(score) as max_score'), DB::raw('MIN(moves) as best_moves'))
                 ->groupBy('user_id')
-                ->orderByDesc('score')
-                ->take(20)
-            ->get();
+                ->orderByDesc('max_score')
+                ->take(2);
+
+            if ($difficulty) {
+                $query->where('difficulty', $difficulty);
+            }
+
+            return $query->get();
+        });
+
+        $formatted = $scores->map(function($score) {
+            return [
+                'user_id' => $score->user_id,
+                'user_name' => $score->user->name,
+                'score' => $score->max_score,
+                'best_moves' => $score->best_moves,
+            ];
         });
 
 
-        // $scores = Score::with('user')->select('user_id', DB::raw('MAX(score) at score'))->groupBy('user_id')->orderByDesc('score')->take(20)->get();
-        // $scores = Score::with('user')->where('game_name', 'Game1')->select('user_id', DB::raw('MAX(score) at score'))->groupBy('user_id')->orderByDesc('score')->take(20)->get();
-
-        $formatted = $scores->map(fn($s) => [
-            'user_id' => $s->user_id,
-            'user_name' => $s->user->name,
-            'score' => $s->score,
+        return response()->json([
+            'scores' => $formatted,
+            'meta' => [
+                'game_id' => $gameId,
+                'difficulty' => $difficulty,
+                'cached' => Cache::has($cacheKey)
+            ]
         ]);
-     
-         return response()->json(['scores' => $formatted]);
 
         // return view('leaderboard.index',compact('scores'));
 
@@ -44,31 +69,54 @@ class LeaderboardController extends Controller
 
 
     //Fetch Update: When an event is received, the client fetches the updated leaderboard from /leaderboard/refresh.
-    public function refresh()
+    public function refresh(Request $request)
     {
 
-       //The leaderboard cache stores the top 20 scores for 5 minutes, reducing database queries for both the main view (/leaderboard) and the refresh endpoint (/leaderboard/refresh).
-        $scores = Cache::remember('leaderboard', 300, function () {
-            return Score::with('user')
-                ->select('user_id', DB::raw('MAX(score) as score'))
-                ->groupBy('user_id')
-                ->orderByDesc('score')
-                ->take(20)
-                ->get();
-        });
+        $request->validate([
+            'game_id' => 'required|integer|exists:games,id',
+            'difficulty' => 'nullable|integer|min:3|max:5'
+        ]);
 
-        // Format data for JSON response
+        $gameId = $request->input('game_id');
+        $difficulty = $request->input('difficulty');
+        $cacheKey = "leaderboard:game:{$gameId}" . ($difficulty ? ":difficulty:{$difficulty}" : '');
+
+        // Clear the cache before fetching fresh data
+        Cache::forget($cacheKey);
+
+        $query = Score::with('user')
+            ->where('game_id', $gameId)
+            ->select('user_id', DB::raw('MAX(score) as max_score'), DB::raw('MIN(moves) as best_moves'))
+            ->groupBy('user_id')
+            ->orderByDesc('max_score')
+        ->take(2);
+
+
+        if ($difficulty) {
+            $query->where('difficulty', $difficulty);
+        }
+
+        $scores = $query->get();
+
         $formattedScores = $scores->map(function ($score) {
             return [
                 'user_id' => $score->user_id,
                 'user_name' => $score->user->name,
-                'score' => $score->score,
+                'score' => $score->max_score,
+                'best_moves' => $score->best_moves,
             ];
         });
 
-        return response()->json(['scores' => $formattedScores]);
+       // Store fresh data in cache
+        Cache::put($cacheKey, $scores, now()->addMinutes(5));
+
+        return response()->json([
+            'scores' => $formattedScores,
+            'meta' => [
+                'game_id' => $gameId,
+                'difficulty' => $difficulty,
+                'cached' => false
+            ]
+        ]);
     }
-
-
-
 }

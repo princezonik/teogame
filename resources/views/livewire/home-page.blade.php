@@ -1,11 +1,12 @@
 <div>
 
-    @livewire('sidebar')
+    @livewire('nav-bar')
 
     <div class=" w-1/2 mx-auto">
 
-        @livewire('teogame-puzzle')
+        @livewire('games')
     </div>
 
     @livewire('aside')
+
 </div>
