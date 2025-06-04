@@ -1,19 +1,14 @@
 <div>
-    {{-- <h2 class="text-xl font-semibold mb-3">Today's Top 10</h2>
-    <ol class="list-decimal ml-6">
-        @foreach($leaders as $leader)
-            <li>{{ $leader->user->name }} - {{ $leader->time_ms }} ms</li>
-        @endforeach
-    </ol> --}}
+ 
 
     <div class="text-white">
     <div id="toast" style="display: none; position: fixed; top:20px; background: #28a745; color: white; padding:10px 20px; border-radius:5px;">
         
     </div>
 
-    {{-- @if($scores->isEmpty())
+    @if(collect($scores)->isEmpty())
         <p>No scores available yet.</p>
-    @else --}}
+    @else 
         <table id="leaderboard-table" class=" " style="width: 300px">
             <thead>
                 <tr class="">
@@ -22,25 +17,18 @@
                     <th>Score</th>
                 </tr>
             </thead>
-
-            {{-- @foreach ($leaderboard as $entry)
-                    <tr>
-                        <td class="p-2">{{ $entry['user_name'] }}</td>
-                        <td class="p-2">{{ $entry['score'] }}</td>
-                    </tr>
-                @endforeach --}}
             
             <tbody id="leaderboard-body" class="text-white">
                 @foreach($scores as $index => $score)
-        <tr data-user-id="{{ $score['user_id'] }}">
-            <td>{{ $index + 1 }}</td>
-            <td>{{ $score['user_name'] }}</td>
-            <td>{{ $score['score'] }}</td>
-        </tr>
-    @endforeach
+                    <tr data-user-id="{{ $score['user_id'] }}">
+                        <td>{{ $index + 1 }}</td>
+                        <td>{{ $score['user_name'] }}</td>
+                        <td>{{ $score['score'] }}</td>
+                    </tr>
+                @endforeach 
             </tbody>
         </table>
-    {{-- @endif --}}
+    @endif
 </div>
 </div>
 @push('styles')
@@ -77,8 +65,6 @@
             background-color: #007bff;
             color: white;
         }
-        tr:hover {
-            background-color: #f5f5f5;
-        }
+        
     </style>
 @endpush

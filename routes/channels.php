@@ -8,8 +8,6 @@ Broadcast::channel('App.Models.User.{id}', function ($user, $id) {
 
 
 Broadcast::channel('leaderboard.{gameId}', function ($user, $gameId) {
-    return [
-        'id' => $user->id,
-        'name' => $user->name,
-    ];
+    
+    return true;
 });

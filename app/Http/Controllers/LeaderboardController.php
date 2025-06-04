@@ -34,7 +34,7 @@ class LeaderboardController extends Controller
                 ->select('user_id', DB::raw('MAX(score) as max_score'), DB::raw('MIN(moves) as best_moves'))
                 ->groupBy('user_id')
                 ->orderByDesc('max_score')
-                ->take(2);
+                ->take(20);
 
             if ($difficulty) {
                 $query->where('difficulty', $difficulty);
@@ -48,7 +48,7 @@ class LeaderboardController extends Controller
                 'user_id' => $score->user_id,
                 'user_name' => $score->user->name,
                 'score' => $score->max_score,
-                'best_moves' => $score->best_moves,
+                // 'best_moves' => $score->best_moves,
             ];
         });
 
@@ -62,8 +62,16 @@ class LeaderboardController extends Controller
             ]
         ]);
 
-        // return view('leaderboard.index',compact('scores'));
+        // return view('leaderboard.index',['scores' => $formatted]);
 
+
+    }
+
+    public function showPage()
+
+    {
+
+    return view('leaderboard.show');
 
     }
 
@@ -86,10 +94,11 @@ class LeaderboardController extends Controller
 
         $query = Score::with('user')
             ->where('game_id', $gameId)
-            ->select('user_id', DB::raw('MAX(score) as max_score'), DB::raw('MIN(moves) as best_moves'))
+            // ->select('user_id', DB::raw('MAX(score) as max_score'), DB::raw('MIN(moves) as best_moves'))
+            ->select('user_id', DB::raw('MAX(score) as max_score'))
             ->groupBy('user_id')
             ->orderByDesc('max_score')
-        ->take(2);
+        ->take(20);
 
 
         if ($difficulty) {

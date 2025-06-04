@@ -1,239 +1,175 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // DOM Elements
-    const puzzleContainer = document.getElementById('puzzle-grid');
-    const difficultySelector = document.getElementById('difficulty');
-    const startButton = document.getElementById('start-game');
+    // === DOM Elements ===
+    const puzzleGrid = document.getElementById('puzzle-grid');
+    const difficultySelect = document.getElementById('difficulty');
+    const startBtn = document.getElementById('start-game');
     const popup = document.getElementById('solved-popup');
-    const closePopupBtn = document.getElementById('close-popup');
+    const closePopup = document.getElementById('close-popup');
     const moveCounter = document.getElementById('move-counter');
     const timeCounter = document.getElementById('time-counter');
     const bestMovesCounter = document.getElementById('best-moves-counter');
 
-    // Game State
+    // === Game State ===
     let gridSize = 3;
+    let tiles = [];
     let moveCount = 0;
-    let startTime;
-    let timerInterval;
-    let currentTiles = [];
-    let isSolving = false;
-    let isGameStarted = false;
+    let startTime = null;
+    let timer = null;
+    let gameActive = false;
+    let puzzleSolved = false;
 
-    // Initialize the game
-    function initGame() {
-        generatePuzzle(gridSize);
+    // === Initialization ===
+    function init() {
         setupEventListeners();
-        loadLocalBestStats();
-        checkPendingScores();
+        generatePuzzle(gridSize);
+        loadBestStats();
     }
 
-    // Generate a new puzzle
+    // === Puzzle Generation ===
     function generatePuzzle(size) {
-        if (isSolving) return;
-
         gridSize = size;
         const total = size * size;
-        currentTiles = Array.from({ length: total }, (_, i) => i);
+        tiles = Array.from({ length: total }, (_, i) => i);
 
         let attempts = 0;
         const MAX_ATTEMPTS = 1000;
-
         do {
-            shuffle(currentTiles);
+            shuffle(tiles);
             attempts++;
-        } while ((!isSolvable(currentTiles, size) || isSolved(currentTiles)) && attempts < MAX_ATTEMPTS);
+        } while ((!isSolvable(tiles, size) || isPuzzleSolved()) && attempts < MAX_ATTEMPTS);
 
-        if (attempts >= MAX_ATTEMPTS) {
-            showTemporaryMessage("Failed to generate puzzle. Reloading...");
-            setTimeout(() => location.reload(), 1500);
-            return;
-        }
-
-        renderTiles();
-        resetGameStats();
+        renderPuzzle();
     }
 
-    // Shuffle array
-    function shuffle(array) {
-        for (let i = array.length - 1; i > 0; i--) {
+    function shuffle(arr) {
+        for (let i = arr.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
-            [array[i], array[j]] = [array[j], array[i]];
+            [arr[i], arr[j]] = [arr[j], arr[i]];
         }
     }
 
-    // Check if puzzle is solvable
-    function isSolvable(tiles, size) {
-        let invCount = 0;
-        for (let i = 0; i < tiles.length - 1; i++) {
-            for (let j = i + 1; j < tiles.length; j++) {
-                if (tiles[i] && tiles[j] && tiles[i] > tiles[j]) {
-                    invCount++;
-                }
+    function isSolvable(arr, size) {
+        let inversions = 0;
+        for (let i = 0; i < arr.length; i++) {
+            for (let j = i + 1; j < arr.length; j++) {
+                if (arr[i] && arr[j] && arr[i] > arr[j]) inversions++;
             }
         }
-
-        if (size % 2 === 1) {
-            return invCount % 2 === 0;
-        } else {
-            const rowFromBottom = size - Math.floor(tiles.indexOf(0) / size);
-            return (invCount + rowFromBottom) % 2 === 0;
-        }
+        if (size % 2 === 1) return inversions % 2 === 0;
+        const emptyRow = size - Math.floor(arr.indexOf(0) / size);
+        return (inversions + emptyRow) % 2 === 0;
     }
 
-    // Check if puzzle is solved
-    function isSolved(tiles) {
+    function isPuzzleSolved() {
         for (let i = 0; i < tiles.length - 1; i++) {
             if (tiles[i] !== i + 1) return false;
         }
         return tiles[tiles.length - 1] === 0;
     }
 
-    // Render tiles
-    function renderTiles() {
-        puzzleContainer.innerHTML = '';
-        puzzleContainer.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+    // === Rendering ===
+    function renderPuzzle() {
+        puzzleGrid.innerHTML = '';
+        puzzleGrid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
 
-        currentTiles.forEach((value, index) => {
+        tiles.forEach((val, idx) => {
             const tile = document.createElement('div');
-            tile.className = `tile ${value === 0 ? 'empty' : 'clickable'}`;
-            tile.dataset.index = index;
-            tile.dataset.value = value;
-
-            if (value !== 0) {
-                tile.textContent = value;
-                tile.addEventListener('click', () => handleTileClick(index));
+            tile.className = val === 0 ? 'tile empty' : 'tile clickable';
+            tile.dataset.index = idx;
+            tile.textContent = val || '';
+            if (val !== 0) {
+                tile.addEventListener('click', () => handleTileClick(idx));
             }
-
-            puzzleContainer.appendChild(tile);
+            puzzleGrid.appendChild(tile);
         });
     }
 
-    // Handle tile click
-    function handleTileClick(clickedIndex) {
-        if (isSolving || !isGameStarted) return;
+    // === User Interaction ===
+    function handleTileClick(index) {
+        if (!gameActive || puzzleSolved) return;
 
-        const emptyIndex = currentTiles.indexOf(0);
+        const emptyIndex = tiles.indexOf(0);
+        if (!isAdjacent(index, emptyIndex)) return;
 
-        if (isAdjacent(clickedIndex, emptyIndex)) {
-            moveCount++;
-            moveCounter.textContent = moveCount;
+        [tiles[index], tiles[emptyIndex]] = [tiles[emptyIndex], tiles[index]];
+        moveCount++;
+        updateMoveDisplay();
+        renderPuzzle();
 
-            [currentTiles[clickedIndex], currentTiles[emptyIndex]] =
-                [currentTiles[emptyIndex], currentTiles[clickedIndex]];
-
-            renderTiles();
-
-            if (isSolved(currentTiles)) {
-                handlePuzzleSolved();
-            }
-        }
+        if (isPuzzleSolved()) handleWin();
     }
 
-    // Check if tiles are adjacent
     function isAdjacent(a, b) {
-        const rowA = Math.floor(a / gridSize), colA = a % gridSize;
-        const rowB = Math.floor(b / gridSize), colB = b % gridSize;
-        return Math.abs(rowA - rowB) + Math.abs(colA - colB) === 1;
+        const [ra, ca] = [Math.floor(a / gridSize), a % gridSize];
+        const [rb, cb] = [Math.floor(b / gridSize), b % gridSize];
+        return Math.abs(ra - rb) + Math.abs(ca - cb) === 1;
     }
 
-    // Reset game stats
-    function resetGameStats() {
+    // === Timer & Moves ===
+    function startGame() {
         moveCount = 0;
-        moveCounter.textContent = '0';
-        resetTimer();
-        isSolving = false;
-        isGameStarted = false;
-        startButton.textContent = 'Start Game';
+        puzzleSolved = false;
+        gameActive = true;
+        updateMoveDisplay();
+        startTime = Date.now();
+        updateTimer();
+        timer = setInterval(updateTimer, 1000);
+        startBtn.textContent = 'Restart Game';
     }
 
-    // Timer functions
-    function startTimer() {
-        startTime = Date.now();
-        timerInterval = setInterval(updateTimer, 1000);
+    function updateMoveDisplay() {
+        moveCounter.textContent = moveCount;
     }
 
     function updateTimer() {
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
-        timeCounter.textContent = formatTime(elapsed);
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        timeCounter.textContent = formatTime(seconds);
     }
 
     function stopTimer() {
-        clearInterval(timerInterval);
+        clearInterval(timer);
+        timer = null;
     }
 
-    function resetTimer() {
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = sec % 60;
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    }
+
+    // === Win Handling ===
+    async function handleWin() {
+        puzzleSolved = true;
+        gameActive = false;
         stopTimer();
-        timeCounter.textContent = "0:00";
-    }
+        const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+        updateBestStats(timeTaken);
 
-    // Format time
-    function formatTime(seconds) {
-        const mins = Math.floor(seconds / 60);
-        const secs = seconds % 60;
-        return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
-    }
-
-    // Handle puzzle completion
-    async function handlePuzzleSolved() {
-        isSolving = true;
-        stopTimer();
+        popup.querySelector('.moves').textContent = moveCount;
+        popup.querySelector('.time').textContent = formatTime(timeTaken);
+        popup.querySelector('.best-moves').textContent = localStorage.getItem(`best_moves_${gridSize}`) || 'N/A';
         popup.classList.remove('hidden');
-        const elapsed = Math.floor((Date.now() - startTime) / 1000);
 
-        // Save stats
-        saveStats(elapsed);
+         // Emit to Livewire for authenticated users
+         
+        setTimeout(() => {
+            if (window.isAuthenticated) {
+                const scoreData = {
+                    moves: moveCount,
+                    time: timeTaken,
+                    difficulty: gridSize,
+                    game_id: window.gameId,
+                    timestamp: new Date().toISOString()
+                };
 
-        // Emit to Livewire for authenticated users
-        if (window.isAuthenticated) {
-            const scoreData = {
-                moves: moveCount,
-                time: elapsed,
-                difficulty: gridSize,
-                game_id: window.gameId,
-                timestamp: new Date().toISOString()
-            };
-
-            console.log('Emitting puzzleSolved event', scoreData);
-            const success = await safeLivewireEmit('puzzleSolved', scoreData);
-
-            if (!success) {
-                showTemporaryMessage('Score will be saved when connection improves');
+                console.log('Preparing to emit puzzleSolved', scoreData);
+                safeLivewireEmit('puzzleSolved', scoreData).then(success => {
+                    if (!success) {
+                        showTemporaryMessage('Score will be saved when connection improves');
+                    }
+                });
             }
-        }
-    }
-
-    // Save stats to localStorage for non-authenticated users
-    function saveStats(elapsed) {
-        if (window.isAuthenticated) return;
-
-        const statsKey = `puzzle_stats_${gridSize}x${gridSize}`;
-        let stats = JSON.parse(localStorage.getItem(statsKey) || '{}');
-
-        stats.bestMoves = Math.min(stats.bestMoves || Infinity, moveCount);
-        stats.bestTime = Math.min(stats.bestTime || Infinity, elapsed);
-        stats.lastMoves = moveCount;
-        stats.lastTime = elapsed;
-        stats.date = new Date().toISOString();
-
-        localStorage.setItem(statsKey, JSON.stringify(stats));
-        updateBestMovesDisplay();
-    }
-
-    // Load local best stats
-    function loadLocalBestStats() {
-        if (window.isAuthenticated) return;
-
-        const statsKey = `puzzle_stats_${gridSize}x${gridSize}`;
-        const stats = JSON.parse(localStorage.getItem(statsKey) || '{}');
-        bestMovesCounter.textContent = stats.bestMoves || 'N/A';
-    }
-
-    // Update best moves display
-    function updateBestMovesDisplay() {
-        if (window.isAuthenticated) return;
-
-        const statsKey = `puzzle_stats_${gridSize}x${gridSize}`;
-        const stats = JSON.parse(localStorage.getItem(statsKey) || '{}');
-        bestMovesCounter.textContent = stats.bestMoves || 'N/A';
+        }, 0);
     }
 
     // Safe Livewire emission
@@ -242,14 +178,12 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             let attempt = 0;
             while (attempt <= retries) {
-                if (window.Livewire && typeof window.Livewire.find === 'function') {
-                    const component = window.Livewire.getByName('sliding-puzzle')[0];
-                    if (component) {
-                        window.Livewire.dispatch(eventName, data);
-                        console.log('Livewire event dispatched', { eventName, data });
-                        return true;
-                    }
+                if (window.slidingPuzzleWire && typeof window.slidingPuzzleWire.$dispatch === 'function') {
+                    window.slidingPuzzleWire.call(eventName, data);
+                    console.log('Livewire event dispatched via $dispatch', { eventName, data });
+                    return true;
                 }
+                    
                 console.log(`Retry ${attempt + 1} for Livewire event`, { eventName, data });
                 await new Promise(resolve => setTimeout(resolve, delay));
                 attempt++;
@@ -266,69 +200,38 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Check pending scores
-    function checkPendingScores() {
-        if (!window.isAuthenticated) return;
-
-        const pendingEvents = JSON.parse(localStorage.getItem('pendingLivewireEvents') || '[]');
-        if (pendingEvents.length > 0 && window.Livewire && typeof window.Livewire.dispatch === 'function') {
-            console.log('Processing pending events', pendingEvents);
-            pendingEvents.forEach(event => {
-                try {
-                    window.Livewire.dispatch(event.eventName, event.data);
-                    console.log('Processed pending event', event);
-                } catch (e) {
-                    console.error('Failed to process pending event:', e);
-                }
-            });
-            localStorage.removeItem('pendingLivewireEvents');
-        }
+    // === Stats Management ===
+    function updateBestStats(timeTaken) {
+        const key = `best_moves_${gridSize}`;
+        const bestMoves = parseInt(localStorage.getItem(key)) || Infinity;
+        if (moveCount < bestMoves) localStorage.setItem(key, moveCount);
+        bestMovesCounter.textContent = Math.min(moveCount, bestMoves);
     }
 
-    // Show temporary message
-    function showTemporaryMessage(message, duration = 3000) {
-        const messageEl = document.createElement('div');
-        messageEl.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50';
-        messageEl.textContent = message;
-        document.body.appendChild(messageEl);
-
-        setTimeout(() => messageEl.remove(), duration);
+    function loadBestStats() {
+        const best = localStorage.getItem(`best_moves_${gridSize}`) || 'N/A';
+        bestMovesCounter.textContent = best;
     }
 
-    // Event listeners
+    // === Event Listeners ===
     function setupEventListeners() {
-        difficultySelector.addEventListener('change', () => {
-            generatePuzzle(parseInt(difficultySelector.value));
-            loadLocalBestStats();
-        });
-
-        startButton.addEventListener('click', () => {
-            if (!isGameStarted) {
-                isGameStarted = true;
-                startButton.textContent = 'Restart Game';
-                startTimer();
-            } else {
-                generatePuzzle(gridSize);
-                loadLocalBestStats();
-            }
-        });
-
-        closePopupBtn.addEventListener('click', () => {
-            popup.classList.add('hidden');
+        difficultySelect.addEventListener('change', () => {
+            gridSize = parseInt(difficultySelect.value);
             generatePuzzle(gridSize);
-            loadLocalBestStats();
+            gameActive = false;
+            startBtn.textContent = 'Start Game';
         });
 
-        if (typeof Livewire === 'undefined') {
-            document.addEventListener('livewire:initialized', () => {
-                console.log('Livewire initialized, checking pending scores');
-                checkPendingScores();
-            });
-        } else {
-            checkPendingScores();
-        }
+        startBtn.addEventListener('click', () => {
+            generatePuzzle(gridSize);
+            startGame();
+        });
+
+        closePopup.addEventListener('click', () => {
+            popup.classList.add('hidden');
+        });
     }
 
-    // Initialize
-    initGame();
+    // === Run Game ===
+    init();
 });

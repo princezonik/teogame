@@ -5,10 +5,10 @@
 <div class="container">
 
     <h1>Leaderboard - Top 20</h1>
-    <div id="toast" style="display: none; position: fixed; top:20px; right:20px; background: #28a745; color: white; padding:10px 20px; border-radius:5px;">
+    <div id="toast">
         
     </div>
-    @if($scores->isEmpty())
+    @if($formatted->isEmpty())
         <p>No scores available yet.</p>
     @else
         <table id="leaderboard-table">
@@ -17,6 +17,7 @@
                     <th>Rank</th>
                     <th>Player</th>
                     <th>Score</th>
+                    <th>Best Moves</th>
                 </tr>
             </thead>
             
@@ -26,6 +27,7 @@
                         <td>{{ $index + 1 }}</td>
                         <td>{{ $score->user->name }}</td>
                         <td>{{ $score->score }}</td>
+                        <td>{{ $score->best_moves }}</td>
                     </tr>
                 @endforeach
             </tbody>
@@ -74,12 +76,4 @@
         }
     </style>
 @endpush
-
-
-  
-
-
-
-
-
 

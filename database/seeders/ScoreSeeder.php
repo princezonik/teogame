@@ -34,9 +34,9 @@ class ScoreSeeder extends Seeder
             Score::create([
                 'user_id' => $user->id,
                 'game_id' => $game->id,  
-                'score' => rand(100, 1000),  
-                'moves' => rand(40, 150),
-                'best_moves' => rand(30, 50),
+                'score' => rand(10, 100),  
+                'moves' => rand(30, 70),
+                'best_moves' => rand(10, 70),
                 'time' => 300,
             ]);
         }

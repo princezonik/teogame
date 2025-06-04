@@ -27,36 +27,16 @@
 
 	<!--end::Head-->
 	<!--begin::Body-->
-	<body id="kt_body" class="header-fixed sidebar-enabled">
-
+	<body id="kt_body" class="w-screen h-screen  font-sans antialiased flex flex-col overflow-x-hidden header-fixed sidebar-enabled">
+        <!--begin::Theme mode setup on page load-->
+		<script>var defaultThemeMode = "light"; var themeMode; if ( document.documentElement ) { if ( document.documentElement.hasAttribute("data-bs-theme-mode")) { themeMode = document.documentElement.getAttribute("data-bs-theme-mode"); } else { if ( localStorage.getItem("data-bs-theme") !== null ) { themeMode = localStorage.getItem("data-bs-theme"); } else { themeMode = defaultThemeMode; } } if (themeMode === "system") { themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } document.documentElement.setAttribute("data-bs-theme", themeMode); }</script>
+		
 		@livewire('home-page')
 
 	
-		
-    @livewire('footer')
         
     
     
-    
-    
-    <!--begin::Javascript-->
-        {{-- <script>var hostUrl = "{{ asset('assets') }}/";</script> --}}
-
-        <!--begin::Global Javascript Bundle (mandatory for all pages)-->
-        <!--end::Global Javascript Bundle-->
-		
-      <!--begin::Vendors Javascript (used for this page only)-->
-        <script src="https://cdn.amcharts.com/lib/5/index.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/xy.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/percent.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/radar.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/themes/Animated.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/map.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/geodata/worldLow.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/geodata/continentsLow.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/geodata/usaLow.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZonesLow.js"></script>
-        <script src="https://cdn.amcharts.com/lib/5/geodata/worldTimeZoneAreasLow.js"></script> 
         <!--end::Vendors Javascript-->
         {{-- <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script> --}}
         <!--begin::Custom Javascript (used for this page only)-->

@@ -10,53 +10,24 @@ window.initializeEcho = function() {
     } else {
         console.warn('window.gameId is undefined, skipping game-specific leaderboard subscription');
     }
-
-    window.Echo.private('leaderboard')
-        .listen('.ScoreUpdated', (event) => {
-            console.log('Global leaderboard update');
-            fetchLeaderboard(gameId);
-        });
 };
 
 
-function fetchLeaderboard(gameId, difficulty = null) {
-
-    const url = '/leaderboard/refresh';
-    const params = new URLSearchParams({ game_id: gameId });
+function fetchLeaderboard(gameId, difficulty = null, e = null) {
     
-    if (difficulty) {
-        params.append('difficulty', difficulty);
+    Livewire.dispatch('setGameId', { gameId, slug: null, difficulty });
+
+    if (e) {
+
+        console.log('dispatching to laravel')
+        Livewire.dispatch('ScoreUpdated', {
+            user_id: e.user_id,
+            user_name: e.user_name,
+            score: e.score,
+            game_id: e.game_id
+        });
     }
 
-    fetch(`${url}?${params.toString()}`, {
-        method: 'POST',
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => {
-        if (!response.ok) throw new Error('Network response was not ok');
-        return response.json();
-    })
-    .then(data => {
-        updateLeaderboardDOM(data.scores);
-    })
-    .catch(error => {
-        console.error('Error refreshing leaderboard:', error);
-    });
-}
-
-function updateLeaderboardDOM(scores) {
-    const tableBody = document.querySelector('#leaderboard-table tbody');
-    tableBody.innerHTML = scores.map(score => `
-        <tr>
-            <td class="p-2">${score.user_name}</td>
-            <td class="p-2">${score.score}</td>
-            <td class="p-2">${score.best_moves || 'N/A'}</td>
-        </tr>
-    `).join('');
 }
 
 function handleResponse(response) {

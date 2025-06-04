@@ -1,80 +1,73 @@
-<div x-data{
-        score: 0,
-        moves: 0,
-        gameId: {{ $gameId }},
-        isAuthenticated: {{ $isAuthenticated ? 'true' : 'false' }},
-        init() {
-            if (!this.isAuthenticated) {
-                // Load score from localStorage for unauthenticated users
-                const saved = localStorage.getItem('game_' + this.gameId + '_score');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    this.score = data.score || 0;
-                    this.moves = data.moves || 0;
-                }
-            }
-        },
-        updateScore(score, moves) {
-            this.score = score;
-            this.moves = moves;
-            if (!this.isAuthenticated) {
-                localStorage.setItem('game_' + this.gameId + '_score', JSON.stringify({
-                    score: this.score,
-                    moves: this.moves
-                }));
-            } else {
+<div class="flex flex-1 flex-row">
+    <div class="flex-1 flex  flex-col items-center justify-center min-h-screen bg-[#faf8ef]" wire:ignore>
 
-                @this.updateScore(this.score, this.moves);
-            }
-        },
-    }
+        <input type="hidden" id="game-id" value="{{ $game->id }}">
 
-    class="flex flex-col items-center justify-center min-h-screen bg-[#faf8ef]"
-    >
-    
-    <input type="hidden" id="game-id" value="{{ $game->id }}">
-
-    <div class="text-center mb-4">
-        <div class="flex justify-center gap-4">
-            <div class="bg-[#bbada0] text-white px-4 py-2 rounded shadow-lg">
-                <div class="text-xs uppercase">Score</div>
-                <div id="score" class="text-xl font-bold">0</div>
-            </div>
-            <div class="bg-[#bbada0] text-white px-4 py-2 rounded shadow-lg">
-                <div class="text-xs uppercase">Best</div>
-                <div id="best" class="text-xl font-bold">0</div>
+        <div class="text-center mb-4">
+            <div class="flex justify-center gap-4">
+                <div class="bg-[#bbada0] text-white px-4 py-2 rounded shadow-lg">
+                    <div class="text-xs uppercase">Score</div>
+                    <div id="score" class="text-xl font-bold">0</div>
+                </div>
+                <div class="bg-[#bbada0] text-white px-4 py-2 rounded shadow-lg">
+                    <div class="text-xs uppercase">Best</div>
+                    <div id="best" class="text-xl font-bold">0</div>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div class="grid grid-cols-4 gap-2 bg-[#bbada0] p-4 rounded-lg shadow-xl" id="game-board">
-        @for($i = 0; $i < 16; $i++)
-            <div class="tile flex items-center justify-center text-2xl font-bold h-20 w-20 text-[#756452] transition-all duration-200 ease-out transform rounded-lg shadow-md hover:shadow-xl" data-index="{{ $i }}"></div>
-        @endfor
-    </div>
-
-    <!-- Tip Icon -->
-    <div class="mt-4 right-4">
-        <button id="tip-icon" class="bg-[#bbada0] text-white px-4 py-2 rounded-full shadow-lg hover:shadow-2xl">
-            ?
-        </button>
-    </div>
-
-    <!-- Tip Modal -->
-    <div id="tip-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
-        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md mx-4">
-            <h2 class="text-xl font-bold mb-4">Game Instructions</h2>
-            <p class="text-lg mb-4">The best strategy for playing 2048 involves focusing on building the highest tile in a corner and keeping the board as open as possible. This strategy helps you avoid getting stuck and creats more opportunities to merge tiles. 2048 is a sliding tile puzzle game where you combine tiles with the same number by sliding them in four directions: up, down, left, and right. The goal is to reach the 2048 tile by combining 2, 4, 8, 16, 32, and so on.</p>
-            <button id="close-tip-modal" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Close</button>
+        <div class="grid grid-cols-4 gap-2 bg-[#bbada0] p-4 rounded-lg shadow-xl" id="game-board">
+            @for($i = 0; $i < 16; $i++)
+                <div class="tile flex items-center justify-center text-2xl font-bold h-20 w-20 text-[#756452] transition-all duration-200 ease-out transform rounded-lg shadow-md hover:shadow-xl" data-index="{{ $i }}"></div>
+            @endfor
         </div>
-    </div>
 
-    <div class="mt-4 flex gap-2">
-        <button onclick="newGame()"  x-on:click="updateScore(score + 10, moves + 1)" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">New Game</button>
-        <button onclick="undoMove()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Undo</button>
-        <button onclick="replayGame()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Replay</button>
+        <!-- Tip Icon -->
+        <div class="mt-4 right-4">
+            <button id="tip-icon" class="bg-[#bbada0] text-white px-4 py-2 rounded-full shadow-lg hover:shadow-2xl">
+                ?
+            </button>
+        </div>
+
+        <!-- Tip Modal -->
+        <div id="tip-modal" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center hidden">
+            <div class="bg-white p-8 rounded-lg shadow-lg max-w-md mx-4">
+                <h2 class="text-xl font-bold mb-4">Game Instructions</h2>
+                <p class="text-lg mb-4">The best strategy for playing 2048 involves focusing on building the highest tile in a corner and keeping the board as open as possible. This strategy helps you avoid getting stuck and creates more opportunities to merge tiles. 2048 is a sliding tile puzzle game where you combine tiles with the same number by sliding them in four directions: up, down, left, and right. The goal is to reach the 2048 tile by combining 2, 4, 8, 16, 32, and so on.</p>
+                <button id="close-tip-modal" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Close</button>
+            </div>
+        </div>
+
+        <div class="mt-4 flex gap-2">
+            <button onclick="newGame()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">New Game</button>
+            <button onclick="undoMove()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Undo</button>
+            <button onclick="replayGame()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Replay</button>
+        </div>
+
+
+        <!-- Leaderboard Aside -->
+        <aside class="w-80 p-4 bg-gray-800 rounded-lg shadow-lg ml-4">
+            <h2 class="text-2xl font-bold mb-4">Leaderboard</h2>
+            <table id="leaderboard-table" class="w-full text-left">
+                <thead>
+                    <tr>
+                        <th class="p-2">Player</th>
+                        <th class="p-2">Score</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach ($leaderboard1 as $entry)
+                        <tr>
+                            <td class="p-2">{{ $entry['user_name'] }}</td>
+                            <td class="p-2">{{ $entry['score'] }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </aside>
     </div>
 </div>
+
 
 @push('scripts')
     <script>
@@ -83,42 +76,27 @@
             const tipModal = document.getElementById("tip-modal");
             const closeModal = document.getElementById("close-tip-modal");
 
-            // Show tip modal when tip icon is clicked
             tipIcon.addEventListener("click", () => {
                 tipModal.classList.remove("hidden");
             });
 
-            // Hide the modal when close button is clicked
             closeModal.addEventListener("click", () => {
                 tipModal.classList.add("hidden");
             });
+
+            // Livewire event listeners
+            Livewire.on('scoreSaved', (event) => {
+                console.log('scoreSaved event:', event);
+                showTemporaryMessage(event.message);
+            });
+
+            Livewire.on('show-error', (event) => {
+                console.log('show-error event:', event);
+                alert(event.message);
+            });
         });
-
-
-        function gameOver() {
-            const score = parseInt(document.getElementById('score').textContent);
-            const gameId = {{ $game->id }}; // Passed from Blade
-
-            fetch('/2048/score', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({
-                    score: score,
-                    game_id: gameId
-                })
-            })
-            .then(res => res.json())
-            .then(data => {
-                console.log("Score submitted:", data);
-            })
-            .catch(err => console.error("Score submission failed", err));
-        }
-
     </script>
-    <script src="{{ asset('js/2048.js') }}"></script>
+    <script src="{{ asset('js/2048.js') }}?v={{ time() }}"></script>
 @endpush
 
 @push('styles')
@@ -145,5 +123,10 @@
         .bg-512  { background-color: #f5c495; }
         .bg-1024 { background-color: #f6cba0; }
         .bg-2048 { background-color: #f7d2ab; }
+
+        /* Fallback for keenicons-duotone */
+        [class*="keenicon"] {
+            font-family: sans-serif !important;
+        }
     </style>
 @endpush

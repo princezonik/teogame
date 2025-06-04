@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Game;
 use Illuminate\Console\Command;
 use App\Services\PuzzleGenerator;
 use Illuminate\Support\Facades\Log;
@@ -23,6 +24,13 @@ class GenerateDailyPuzzle extends Command
 
     public function handle()
     {
+        $game = Game::where('slug', 'teogame-puzzle')->first();
+
+        if (!$game) {
+            $this->error('Color Pipes game (teogame-puzzle) not found.');
+            Log::error('Color Pipes game (teogame-puzzle) not found.');
+            return 1;
+        }
         Log::info('Running puzzle:generate with arguments: ' . json_encode($this->arguments()));
         
         
@@ -47,7 +55,8 @@ class GenerateDailyPuzzle extends Command
         $this->info("Generating puzzle for {$date->toDateString()} with grid size {$gridSize}...");
 
         try {
-            $puzzle = $this->generator->generate($date, $gridSize);
+            // Pass the game ID to the PuzzleGenerator
+            $puzzle = $this->generator->generate($date, $gridSize, $game->id);
             $this->info("Puzzle generated successfully: ID {$puzzle->id}");
             return 0;
         } catch (\Exception $e) {

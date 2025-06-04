@@ -3,31 +3,32 @@ window.axios = axios;
 
 window.axios.defaults.headers.common['X-Requested-With'] = 'XMLHttpRequest';
 
-/**
- * Echo exposes an expressive API for subscribing to channels and listening
- * for events that are broadcast by Laravel. Echo and event broadcasting
- * allow your team to quickly build robust real-time web applications.
- */
+let token = document.head.querySelector('meta[name="csrf-token"]');
+if (token) {
+    window.axios.defaults.headers.common['X-CSRF-TOKEN'] = token.content;
+} else {
+    console.warn('CSRF token not found: https://laravel.com/docs/csrf');
+}
 
 import Echo from 'laravel-echo';
 import Pusher from 'pusher-js';
 
 window.Pusher = Pusher;
 
-Pusher.logToConsole = true;
+// Enable Pusher logging only in development
+// if (import.meta.env.VITE_APP_ENV === 'local') {
+    Pusher.logToConsole = true;
+// }
 
-
-
-window.Echo = new Echo({
-    broadcaster: 'pusher',
-    key: import.meta.env.VITE_PUSHER_APP_KEY, // Load the Pusher key from your environment
-    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER, // Load the Pusher cluster from your environment
-    authEndpoint: '/broadcasting/auth',
-    forceTLS: true,
-    auth: {
-        headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-        }
-    }
-    
-});
+try {
+    window.Echo = new Echo({
+        broadcaster: 'pusher',
+        key: import.meta.env.VITE_PUSHER_APP_KEY,
+        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER,
+        authEndpoint: '/broadcasting/auth',
+        forceTLS: true,
+    });
+    console.log('Echo initialized successfully');
+} catch (error) {
+    console.error('Failed to initialize Echo:', error);
+}

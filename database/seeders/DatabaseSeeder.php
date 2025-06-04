@@ -22,11 +22,10 @@ class DatabaseSeeder extends Seeder
         ]);
 
         $this->call(UserSeeder::class);
-        
-        $this->call([
-            UserScoreSeeder::class,
-        ]);
 
+        $this->call([
+            AdminSeeder::class,
+        ]);
        
         $this->call([
             RoleSeeder::class,

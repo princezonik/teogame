@@ -15,14 +15,22 @@ class Games extends Component
         $this->games = $dailyGameService->getDailyGame();
 
         if ($this->games) {
+            //If the event might be dispatched before the Leaderboard mounts, store the game ID in the session:
+            // session()->put('current_game', [
+            //     'id' => $this->games->id,
+            //     'slug' => $this->games->slug
+            // ]);
+
             $this->dispatch('gameReady', 
                 gameId: $this->games->id,
                 slug: $this->games->slug
             )->self();
+            
             $this->dispatch('setGameId', 
                 gameId: $this->games->id,
                 slug: $this->games->slug
-            ); // New event for global gameId
+            );
+
             $this->isGameLoaded = true;
         }
     }

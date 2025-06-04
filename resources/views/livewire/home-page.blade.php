@@ -1,12 +1,14 @@
-<div>
+<div >
 
+    <div class="flex"></div>
     @livewire('nav-bar')
 
-    <div class=" w-1/2 mx-auto">
+  
 
         @livewire('games')
-    </div>
 
-    @livewire('aside')
+    {{-- @livewire('aside') --}}
+
+    @livewire('footer')
 
 </div>

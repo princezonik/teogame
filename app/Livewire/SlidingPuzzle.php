@@ -17,7 +17,7 @@ class SlidingPuzzle extends Component
     public $bestMoves = null;
     
 
-    protected $listeners = ['puzzleSolved'];
+    protected $listeners = [ 'puzzleSolved'];
 
     public function mount($game)
     {
@@ -33,20 +33,13 @@ class SlidingPuzzle extends Component
         $this->loadBestMoves();
     }
 
-    public function puzzleSolved($moves, $time, $difficulty, $game_id, $timestamp)
+    public function puzzleSolved(array $data)
     {
         if (!Auth::check()) {
-            Log::info('Non-authenticated user completed puzzle, skipping DB save', ['data' => $data]);
+            Log::info('Non-authenticated user completed puzzle, skipping DB save');
             return;
         }
 
-        $data = [
-            'moves' => $moves,
-            'time' => $time,
-            'difficulty' => $difficulty,
-            'game_id' => $game_id,
-            'timestamp' => $timestamp,
-        ];
 
         // Validate data
         $validated = validator($data, [
@@ -59,6 +52,21 @@ class SlidingPuzzle extends Component
 
         if ($validated['game_id'] != $this->game->id) {
             Log::error('Game ID mismatch', ['received' => $validated['game_id'], 'expected' => $this->game->id]);
+            return;
+        }
+
+        // Calculate new score
+        $newScore = $this->calculateScore($validated['moves'], $validated['time'], $validated['difficulty'] ?? 3);
+
+        // Get existing score for this user and game
+        $existingScore = Score::where('user_id', Auth::id())->where('game_id', $this->game->id)->first();
+
+        // If existing score is higher or equal, do nothing
+        if ($existingScore && $existingScore->score >= $newScore) {
+            Log::info('New score is not higher. No update performed.', [
+                'new_score' => $newScore,
+                'existing_score' => $existingScore->score,
+            ]);
             return;
         }
 
@@ -79,19 +87,20 @@ class SlidingPuzzle extends Component
 
             Log::info('Score saved successfully', $score->toArray());
 
-            // Broadcast event
             event(new ScoreUpdated($score));
 
             // Update UI
-            $this->loadLeaderboard();
+            // $this->loadLeaderboard();
             $this->loadBestMoves();
-            $this->dispatch('update-best-moves', ['bestMoves' => $score->best_moves]);
-            $this->dispatch('scoreSaved', ['message' => 'Score saved successfully']);
+            // $this->dispatch('update-best-moves', ['bestMoves' => $score->best_moves]);
+           
 
         } catch (\Exception $e) {
             Log::error('Score save error', ['error' => $e->getMessage(), 'data' => $data]);
             $this->dispatch('show-error', ['message' => 'Failed to save score']);
         }
+
+         return $this->skipRender();
     }
 
     
@@ -105,28 +114,38 @@ class SlidingPuzzle extends Component
     public function loadLeaderboard()
     {
         try {
-            $this->leaderboard = Score::with('user')
+            // Subquery to get each user's latest score for the current game
+            $subQuery = Score::selectRaw('MAX(id) as id')
                 ->where('game_id', $this->game->id)
-                ->orderBy('score', 'desc')
+                ->groupBy('user_id');
+
+            // Get the full score records for those IDs
+            $this->leaderboard = Score::with('user')
+                ->whereIn('id', $subQuery)
+                ->orderByDesc('score')
                 ->limit(10)
                 ->get()
                 ->map(function ($score) {
                     return [
+                        'game_id' => $score->game_id,
                         'user_name' => $score->user->name ?? 'Unknown',
                         'score' => $score->score,
                         'best_moves' => $score->best_moves,
                         'time' => $score->time,
                         'difficulty' => $score->difficulty,
+
                     ];
                 })
                 ->toArray();
 
             Log::info('Leaderboard loaded', ['leaderboard' => $this->leaderboard]);
+
         } catch (\Exception $e) {
             Log::error('Failed to load leaderboard', ['error' => $e->getMessage()]);
             $this->leaderboard = [];
         }
     }
+
 
     public function loadBestMoves()
     {

@@ -41,7 +41,7 @@ function move(direction) {
 
     for (let i = 0; i < 4; i++) {
         let line = getLine(i, direction);
-        let mergedLine = mergeLine(line, i, direction);
+        let mergedLine = mergeLine(line);
         setLine(i, mergedLine, direction);
     }
 
@@ -119,7 +119,7 @@ function addTile() {
     grid[index] = Math.random() < 0.9 ? 2 : 4;
 }
 
-function render() {
+async function render() {
     document.querySelectorAll('.tile').forEach((tile, index) => {
         tile.textContent = grid[index] === 0 ? '' : grid[index];
         tile.className = 'tile flex items-center justify-center text-2xl font-bold h-20 w-20 transition-all tile-move ' +
@@ -131,7 +131,26 @@ function render() {
     localStorage.setItem("best", best);
 
     if (isGameOver()) {
-        setTimeout(() => alert("Game Over!"), 200);
+        setTimeout(async () => {
+            alert("Game Over!");
+
+             // Emit to Livewire for authenticated users
+            if (window.isAuthenticated) {
+                const moves = moveHistory.length; // this is available
+                const timestamp = new Date().toISOString();
+                const game_id = document.getElementById('game-id').value;
+                const bestMoves = moves; // set to same for now
+                const scoreData = { moves, bestMoves, game_id, timestamp };
+                
+                console.log('Emitting puzzleSolved event', scoreData);
+                const success = await safeLivewireEmit('puzzleSolved', scoreData);
+                
+                if (!success) {
+                    showTemporaryMessage('Score will be saved when connection improves');
+                }
+            }
+            
+        }, 200);
     }
 }
 
@@ -144,6 +163,10 @@ function saveGame() {
     localStorage.setItem("grid", JSON.stringify(grid));
     localStorage.setItem("score", score);
     localStorage.setItem("moveHistory", JSON.stringify(moveHistory));
+    if (!window.isAuthenticated) {
+        const gameId = document.getElementById('game-id').value;
+        localStorage.setItem(`game_${gameId}_score`, JSON.stringify({ score, moves: moveHistory.length }));
+    }
 }
 
 function loadGame() {
@@ -171,6 +194,47 @@ function isGameOver() {
         if (x < 3 && grid[i] === grid[i + 1]) return false;
         if (y < 3 && grid[i] === grid[i + 4]) return false;
     }
+    
+   
     return true;
-} 
-const gameId = document.getElementById('game-id').value;
+}
+
+async function safeLivewireEmit(eventName, data, retries = 5, delay = 500) {
+    console.log('Attempting to dispatch Livewire event', { eventName, data });
+
+    try {
+        let attempt = 0;
+        while (attempt <= retries) {
+            if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
+                Livewire.dispatch(eventName, data);
+                console.log('Livewire event dispatched via Livewire.dispatch', { eventName, data });
+                return true;
+            }
+
+            console.log(`Retry ${attempt + 1} for Livewire.dispatch`, { eventName, data });
+            await new Promise(resolve => setTimeout(resolve, delay));
+            attempt++;
+        }
+
+        console.warn('Livewire.dispatch not available, storing event locally', { eventName, data });
+        const pendingEvents = JSON.parse(localStorage.getItem('pendingLivewireEvents') || '[]');
+        pendingEvents.push({ eventName, data });
+        localStorage.setItem('pendingLivewireEvents', JSON.stringify(pendingEvents));
+        return false;
+
+    } catch (error) {
+        console.error('Error dispatching Livewire event:', error);
+        return false;
+    }
+}
+
+
+function showTemporaryMessage(message, duration = 3000) {
+    console.log('Showing temporary message:', message);
+    const messageEl = document.createElement('div');
+    messageEl.className = 'fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+    messageEl.textContent = message;
+    document.body.appendChild(messageEl);
+
+    setTimeout(() => messageEl.remove(), duration);
+}

@@ -8,9 +8,14 @@ class Game extends Model
 {
     protected $fillable = ['title', 'slug', 'description'];
 
-    public function scores(): HasMany
+    public function scores()
     {
-        return $this->hasMany(Score::class, 'game_id', 'id');
+        return $this->hasMany(Score::class);
+    }
+
+    public function puzzles()
+    {
+        return $this->hasMany(Puzzle::class);
     }
 
 }

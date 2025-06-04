@@ -104,7 +104,7 @@
 
         <div class="hidden lg:flex flex-col justify-between lg:rounded-xl lg:border lg:border-light lg:m-5 order-1 lg:order-2 bg-top xxl:bg-center xl:bg-cover bg-no-repeat branded-bg gap-y-8">
 
-            <img class="h-full" src="{{ asset('images/board.png') }}" alt="Logo">
+            {{-- <img class="h-full" src="{{ asset('images/board.png') }}" alt="Logo"> --}}
 
         </div>
     </div>

@@ -21,7 +21,7 @@ return new class extends Migration
             $table->integer('score')->nullable();
             $table->integer('moves')->default(0);
             $table->integer('best_moves')->nullable();
-            $table->integer('time');
+            $table->integer('time')->nullable();
             $table->integer('difficulty')->nullable();
             $table->timestamps();
 

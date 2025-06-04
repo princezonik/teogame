@@ -9,12 +9,16 @@ class Puzzle extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name','date', 'seed', 'grid_data'];
+    protected $fillable = ['name','date', 'seed', 'grid_data', 'game_id'];
 
     protected $casts = [
         'date' => 'date',
     ];
 
+    public function game()
+    {
+        return $this->belongsTo(Game::class);
+    }
  
 
     public function attempts() {

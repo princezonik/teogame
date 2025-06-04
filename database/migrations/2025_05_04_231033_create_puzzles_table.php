@@ -13,11 +13,13 @@ return new class extends Migration
     {
         Schema::create('puzzles', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('game_id')->constrained()->onDelete('cascade');
             $table->string('name')->nullable(); // Optional puzzle name or theme
             $table->integer('grid_size')->default(5); // Grid size, default 5x5
             $table->date('date')->unique(); // Date of the puzzle (for daily puzzles)
             $table->integer('seed'); // Random seed for generation
             $table->timestamps();
+
         });
     }
 

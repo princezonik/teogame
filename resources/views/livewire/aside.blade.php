@@ -258,7 +258,8 @@
             
                                     <!--begin::Title-->
                                     <div class=" flex-column">
-                                       @livewire('leaderboard')
+                                      
+                                      @livewire('leaderboard', ['gameId' => $game->id])
                                     </div>
                                     <!--end::Title-->
                                 </div>
