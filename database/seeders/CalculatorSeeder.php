@@ -47,7 +47,7 @@ class CalculatorSeeder extends Seeder
             ['title' => 'Exp to Level ', 'slug' => 'exp-to-level', 'description' => 'Predict your game rank'],
             ['title' => 'Pixel Art Cost', 'slug' => 'pixel-art-cost-estimator', 'description' => 'Simulate fair coin flips'],
             ['title' => 'Twitch Revenue Estimator', 'slug' => 'twitch-revenue-estimator', 'description' => 'Simulate gacha pulls'],
-            ['title' => 'vram-fit-checker', 'slug' => 'vram-fit-checker', 'description' => 'Calculate your damage per second'],
+            ['title' => 'Vram Fit Checker', 'slug' => 'vram-fit-checker', 'description' => 'Calculate your damage per second'],
             // ['title' => 'vram-fit-checker', 'slug' => 'dps-calculator', 'description' => 'Calculate your damage per second'],
 
         ];

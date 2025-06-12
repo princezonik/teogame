@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // === DOM Elements ===
+    //  DOM Elements
     const puzzleGrid = document.getElementById('puzzle-grid');
     const difficultySelect = document.getElementById('difficulty');
     const startBtn = document.getElementById('start-game');
@@ -9,7 +9,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const timeCounter = document.getElementById('time-counter');
     const bestMovesCounter = document.getElementById('best-moves-counter');
 
-    // === Game State ===
+    //  Game State 
     let gridSize = 3;
     let tiles = [];
     let moveCount = 0;
@@ -18,14 +18,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let gameActive = false;
     let puzzleSolved = false;
 
-    // === Initialization ===
+    //  Initialization
     function init() {
         setupEventListeners();
         generatePuzzle(gridSize);
         loadBestStats();
     }
 
-    // === Puzzle Generation ===
+    //  Puzzle Generation 
     function generatePuzzle(size) {
         gridSize = size;
         const total = size * size;
@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return tiles[tiles.length - 1] === 0;
     }
 
-    // === Rendering ===
+    //  Rendering 
     function renderPuzzle() {
         puzzleGrid.innerHTML = '';
         puzzleGrid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
@@ -84,7 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // === User Interaction ===
+    // User Interaction
     function handleTileClick(index) {
         if (!gameActive || puzzleSolved) return;
 
@@ -105,7 +105,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return Math.abs(ra - rb) + Math.abs(ca - cb) === 1;
     }
 
-    // === Timer & Moves ===
+    // Timer & Moves
     function startGame() {
         moveCount = 0;
         puzzleSolved = false;
@@ -137,11 +137,11 @@ document.addEventListener('DOMContentLoaded', () => {
         return `${m}:${s.toString().padStart(2, '0')}`;
     }
 
-    // === Win Handling ===
+    //  Win Handling 
     async function handleWin() {
+        stopTimer();
         puzzleSolved = true;
         gameActive = false;
-        stopTimer();
         const timeTaken = Math.floor((Date.now() - startTime) / 1000);
         updateBestStats(timeTaken);
 
@@ -150,7 +150,7 @@ document.addEventListener('DOMContentLoaded', () => {
         popup.querySelector('.best-moves').textContent = localStorage.getItem(`best_moves_${gridSize}`) || 'N/A';
         popup.classList.remove('hidden');
 
-         // Emit to Livewire for authenticated users
+        // Emit to Livewire for authenticated users
          
         setTimeout(() => {
             if (window.isAuthenticated) {
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // === Stats Management ===
+    //  Stats Management ===
     function updateBestStats(timeTaken) {
         const key = `best_moves_${gridSize}`;
         const bestMoves = parseInt(localStorage.getItem(key)) || Infinity;
@@ -213,7 +213,7 @@ document.addEventListener('DOMContentLoaded', () => {
         bestMovesCounter.textContent = best;
     }
 
-    // === Event Listeners ===
+    //  Event Listeners 
     function setupEventListeners() {
         difficultySelect.addEventListener('change', () => {
             gridSize = parseInt(difficultySelect.value);
@@ -232,6 +232,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // === Run Game ===
+    //  Run Game 
     init();
 });

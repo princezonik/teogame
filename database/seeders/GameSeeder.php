@@ -15,12 +15,12 @@ class GameSeeder extends Seeder
     public function run(): void
     {
         Game::insert([
-            [
-                'title' => '2048',
-                'image' => 'images/puzzle2048.png',
-                'description' => 'The 2048 game is a popular single-player sliding puzzle game where the objective is to combine like-numbered tiles to create a tile with the number 2048. The game is played on a 4x4 grid, and the player can slide tiles in four directions (up, down, left, or right). Each move merges two tiles with the same number into one, and new tiles (usually with the value of 2 or 4) appear on the grid after each move. The game ends when the player creates a tile with the number 2048 or when the grid fills up and no more moves are possible.',
-                'slug' => 'game2048'
-            ],
+            // [
+            //     'title' => '2048',
+            //     'image' => 'images/puzzle2048.png',
+            //     'description' => 'The 2048 game is a popular single-player sliding puzzle game where the objective is to combine like-numbered tiles to create a tile with the number 2048. The game is played on a 4x4 grid, and the player can slide tiles in four directions (up, down, left, or right). Each move merges two tiles with the same number into one, and new tiles (usually with the value of 2 or 4) appear on the grid after each move. The game ends when the player creates a tile with the number 2048 or when the grid fills up and no more moves are possible.',
+            //     'slug' => 'game2048'
+            // ],
 
             [
                 'title' => 'Color Pipes',

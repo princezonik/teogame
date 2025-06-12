@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Livewire\Attributes\On;
 
 class Game2048 extends Component
 {
@@ -23,7 +24,6 @@ class Game2048 extends Component
 
     public $game;
 
-    protected $listeners = ['puzzleSolved'];
 
 
     public function mount(Game $game)
@@ -40,6 +40,7 @@ class Game2048 extends Component
          $this->loadLeaderboard1();
     }
 
+    #[On('puzzleSolved')]
     public function puzzleSolved($data)
     {
         if (!Auth::check()) {
@@ -134,10 +135,11 @@ class Game2048 extends Component
     public function loadLeaderboard1()
     {
         try {
+            
             // Subquery to get each user's latest score for the current game
             $subQuery = Score::selectRaw('MAX(id) as id')
                 ->where('game_id', $this->game->id)
-                ->groupBy('user_id');
+            ->groupBy('user_id');
 
             // Get the full score records for those IDs
             $this->leaderboard1 = Score::with('user')
@@ -156,7 +158,7 @@ class Game2048 extends Component
 
                     ];
                 })
-                ->toArray();
+            ->toArray();
 
             Log::info('Leaderboard loaded', ['leaderboard' => $this->leaderboard1]);
 
@@ -164,11 +166,7 @@ class Game2048 extends Component
             Log::error('Failed to load leaderboard', ['error' => $e->getMessage()]);
             $this->leaderboard1 = [];
         }
-    }
-
-
-    
-   
+    } 
 
     public function render()
     {

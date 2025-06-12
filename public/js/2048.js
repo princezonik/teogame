@@ -154,6 +154,36 @@ async function render() {
     }
 }
 
+async function safeLivewireEmit(eventName, data, retries = 5, delay = 500) {
+    console.log('Attempting to dispatch Livewire event', { eventName, data });
+
+    try {
+        let attempt = 0;
+        while (attempt <= retries) {
+            if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
+                Livewire.dispatch(eventName, data);
+                console.log('Livewire event dispatched via Livewire.dispatch', { eventName, data });
+                return true;
+            }
+
+            console.log(`Retry ${attempt + 1} for Livewire.dispatch`, { eventName, data });
+            await new Promise(resolve => setTimeout(resolve, delay));
+            attempt++;
+        }
+
+        console.warn('Livewire.dispatch not available, storing event locally', { eventName, data });
+        const pendingEvents = JSON.parse(localStorage.getItem('pendingLivewireEvents') || '[]');
+        pendingEvents.push({ eventName, data });
+        localStorage.setItem('pendingLivewireEvents', JSON.stringify(pendingEvents));
+        return false;
+
+    } catch (error) {
+        console.error('Error dispatching Livewire event:', error);
+        return false;
+    }
+}
+
+
 function getTileColor(value) {
     const validValues = [2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048];
     return validValues.includes(value) ? `bg-${value}` : 'bg-[#cdc1b4]';
@@ -199,34 +229,6 @@ function isGameOver() {
     return true;
 }
 
-async function safeLivewireEmit(eventName, data, retries = 5, delay = 500) {
-    console.log('Attempting to dispatch Livewire event', { eventName, data });
-
-    try {
-        let attempt = 0;
-        while (attempt <= retries) {
-            if (typeof Livewire !== 'undefined' && typeof Livewire.dispatch === 'function') {
-                Livewire.dispatch(eventName, data);
-                console.log('Livewire event dispatched via Livewire.dispatch', { eventName, data });
-                return true;
-            }
-
-            console.log(`Retry ${attempt + 1} for Livewire.dispatch`, { eventName, data });
-            await new Promise(resolve => setTimeout(resolve, delay));
-            attempt++;
-        }
-
-        console.warn('Livewire.dispatch not available, storing event locally', { eventName, data });
-        const pendingEvents = JSON.parse(localStorage.getItem('pendingLivewireEvents') || '[]');
-        pendingEvents.push({ eventName, data });
-        localStorage.setItem('pendingLivewireEvents', JSON.stringify(pendingEvents));
-        return false;
-
-    } catch (error) {
-        console.error('Error dispatching Livewire event:', error);
-        return false;
-    }
-}
 
 
 function showTemporaryMessage(message, duration = 3000) {

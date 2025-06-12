@@ -1,5 +1,5 @@
-<div class="flex flex-1 flex-row">
-    <div class="flex-1 flex  flex-col items-center justify-center min-h-screen bg-[#faf8ef]" wire:ignore>
+<div  x-data x-init="window.slidingPuzzleWire = $wire" class="flex flex-1 flex-row">
+    <div class="flex-1 flex  flex-col items-center justify-center min-h-screen" wire:ignore>
 
         <input type="hidden" id="game-id" value="{{ $game->id }}">
 
@@ -43,28 +43,6 @@
             <button onclick="undoMove()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Undo</button>
             <button onclick="replayGame()" class="bg-[#8f7a66] text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-2xl">Replay</button>
         </div>
-
-
-        <!-- Leaderboard Aside -->
-        <aside class="w-80 p-4 bg-gray-800 rounded-lg shadow-lg ml-4">
-            <h2 class="text-2xl font-bold mb-4">Leaderboard</h2>
-            <table id="leaderboard-table" class="w-full text-left">
-                <thead>
-                    <tr>
-                        <th class="p-2">Player</th>
-                        <th class="p-2">Score</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($leaderboard1 as $entry)
-                        <tr>
-                            <td class="p-2">{{ $entry['user_name'] }}</td>
-                            <td class="p-2">{{ $entry['score'] }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </aside>
     </div>
 </div>
 
