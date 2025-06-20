@@ -23,6 +23,8 @@ class Sidebar extends Component
         $this->activeCalculator = $this->activeCalculator === $id ? null : $id;
     }
 
+    
+
    
     public function render()
     {

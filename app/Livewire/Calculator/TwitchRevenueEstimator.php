@@ -3,6 +3,10 @@
 namespace App\Livewire\Calculator;
 
 use Livewire\Component;
+use App\Models\Calculator;
+use App\Models\CalculatorUsage;
+use Illuminate\Support\Facades\Auth;
+
 
 class TwitchRevenueEstimator extends Component
 {
@@ -18,10 +22,18 @@ class TwitchRevenueEstimator extends Component
     public $adRevenue;
     public $totalRevenue;
 
+    public $calculatorId;
+
+    public function mount()
+    {
+        $this->calculatorId = Calculator::where('slug', 'twitch-revenue-estimator')->value('id');
+    }
+
     public function updated($property)
     {
         $this->calculateRevenue();
     }
+
 
     public function calculateRevenue()
     {
@@ -36,7 +48,31 @@ class TwitchRevenueEstimator extends Component
         $this->adRevenue = ($this->adViews / 1000) * $adCPM;
 
         $this->totalRevenue = round($this->subRevenue + $this->bitsRevenue + $this->adRevenue, 2);
+        $this->logUsage();
     }
+
+    private function logUsage()
+    {
+        CalculatorUsage::create([
+            'user_id' => Auth::id(),
+            'calculator_id' => $this->calculatorId,
+            'inputs' => [
+                'tier1' => $this->tier1,
+                'tier2' => $this->tier2,
+                'tier3' => $this->tier3,
+                'bits' => $this->bits,
+                'adViews' => $this->adViews,
+            ],
+            'result' => [
+                'subRevenue' => $this->subRevenue,
+                'bitsRevenue' => $this->bitsRevenue,
+                'adRevenue' => $this->adRevenue,
+                'totalRevenue' => $this->totalRevenue,
+            ],
+           
+        ]);
+    }
+
     public function render()
     {
         return view('livewire.calculator.twitch-revenue-estimator');

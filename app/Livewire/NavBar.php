@@ -3,6 +3,8 @@
 namespace App\Livewire;
 
 use App\Models\Calculator;
+use App\Models\CalculatorUsage;
+use Illuminate\Support\Facades\Auth;
 use Livewire\Component;
 
 class NavBar extends Component
@@ -28,6 +30,8 @@ class NavBar extends Component
                 'slug' => $calculator->slug,  
                 'description' => $calculator->description
             ];
+
+           
         }
     }
 

@@ -31,10 +31,14 @@
 
 
     <body id="kt_body " class="w-screen h-screen  font-sans antialiased flex flex-col overflow-x-hidden header-fixed sidebar-enabled">
+        
         <!--begin::Theme mode setup on page load-->
 		<script>var defaultThemeMode = "light"; var themeMode; if ( document.documentElement ) { if ( document.documentElement.hasAttribute("data-bs-theme-mode")) { themeMode = document.documentElement.getAttribute("data-bs-theme-mode"); } else { if ( localStorage.getItem("data-bs-theme") !== null ) { themeMode = localStorage.getItem("data-bs-theme"); } else { themeMode = defaultThemeMode; } } if (themeMode === "system") { themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } document.documentElement.setAttribute("data-bs-theme", themeMode); }</script>
 		
+        <livewire:nav-bar />
+        
         <main >
+           
             @yield('content')
         </main>
  

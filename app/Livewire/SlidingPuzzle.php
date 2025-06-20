@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 use Illuminate\Support\Facades\DB;
 use App\Events\ScoreUpdated;
+use Livewire\Attributes\On;
 
 class SlidingPuzzle extends Component
 {
@@ -61,12 +62,17 @@ class SlidingPuzzle extends Component
         // Get existing score for this user and game
         $existingScore = Score::where('user_id', Auth::id())->where('game_id', $this->game->id)->first();
 
-        // If existing score is higher or equal, do nothing
-        if ($existingScore && $existingScore->score >= $newScore) {
-            Log::info('New score is not higher. No update performed.', [
+        // Validate if the new score is better
+        $shouldUpdate = !$existingScore || ($newScore > $existingScore->score) || ($validated['moves'] < $existingScore->moves);
+
+        if (!$shouldUpdate) {
+            Log::info('Score not updated', [
+                'current_score' => $existingScore->score ?? null,
                 'new_score' => $newScore,
-                'existing_score' => $existingScore->score,
+                'current_moves' => $existingScore->moves ?? null,
+                'new_moves' => $validated['moves']
             ]);
+
             return;
         }
 
@@ -78,7 +84,10 @@ class SlidingPuzzle extends Component
                 ],
                 [
                     'score' => $this->calculateScore($validated['moves'], $validated['time'], $validated['difficulty'] ?? 3),
-                    'best_moves' => DB::raw('LEAST(COALESCE(best_moves, 999999), ' . $validated['moves'] . ')'),
+                    'best_moves' => min(
+                        $validated['moves'],
+                        $existingScore->best_moves ?? $validated['moves']
+                    ),
                     'difficulty' => $validated['difficulty'],
                     'moves' => $validated['moves'],
                     'time' => $validated['time'],
@@ -89,8 +98,6 @@ class SlidingPuzzle extends Component
 
             event(new ScoreUpdated($score));
 
-            // Update UI
-            // $this->loadLeaderboard();
             $this->loadBestMoves();
             // $this->dispatch('update-best-moves', ['bestMoves' => $score->best_moves]);
            
@@ -146,7 +153,7 @@ class SlidingPuzzle extends Component
         }
     }
 
-
+    #[On('requestBestMoves')]
     public function loadBestMoves()
     {
         if (Auth::check()) {
@@ -155,6 +162,13 @@ class SlidingPuzzle extends Component
                 ->first();
             $this->bestMoves = $score->best_moves ?? null;
         }
+
+        $this->dispatch('best-moves-loaded', [
+        'gameId' => $this->game->id,
+        'bestMoves' => $this->bestMoves,
+        'source' => 'server',
+        'timestamp' => now()->toISOString()
+    ]);
     }
 
     public function render()

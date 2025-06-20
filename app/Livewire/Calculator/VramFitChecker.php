@@ -3,6 +3,9 @@
 namespace App\Livewire\Calculator;
 
 use Livewire\Component;
+use App\Models\Calculator;
+use App\Models\CalculatorUsage;
+use Illuminate\Support\Facades\Auth;
 
 class VramFitChecker extends Component
 {
@@ -11,6 +14,13 @@ class VramFitChecker extends Component
     public $textureSize; // in GB
     public $textureQuality = 'medium'; // Default quality
     public $result;
+    public $calculatorId;
+
+    public function mount()
+    {
+        $this->calculatorId = Calculator::where('slug', 'vram-fit-checker')->value('id');
+    }
+
 
     public $qualityGuidelines = [
         'low' => 1, // 1 GB for low quality textures
@@ -29,10 +39,31 @@ class VramFitChecker extends Component
 
         if ($this->availableVram >= $requiredVram) {
             $this->result = 'Fits';
+
         } else {
             $this->result = 'Upgrade Needed';
         }
+
+        $this->logUsage();
     }
+
+    private function logUsage()
+    {
+        CalculatorUsage::create([
+            'user_id' => Auth::id(),
+            'calculator_id' => $this->calculatorId,
+            'inputs' => [
+                'availableVram' => $this->availableVram,
+                'textureSize' => $this->textureSize,
+                'textureQuality' => $this->textureQuality,
+            ],
+            'result' => [
+                'result' => $this->result,
+            ],
+        
+        ]);
+    }
+
     public function render()
     {
         return view('livewire.calculator.vram-fit-checker');

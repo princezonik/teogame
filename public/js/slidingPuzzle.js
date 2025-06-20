@@ -17,12 +17,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let timer = null;
     let gameActive = false;
     let puzzleSolved = false;
+    let bestMoves = null;
 
     //  Initialization
     function init() {
         setupEventListeners();
         generatePuzzle(gridSize);
-        loadBestStats();
+        loadBestMoves();
     }
 
     //  Puzzle Generation 
@@ -147,29 +148,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
         popup.querySelector('.moves').textContent = moveCount;
         popup.querySelector('.time').textContent = formatTime(timeTaken);
-        popup.querySelector('.best-moves').textContent = localStorage.getItem(`best_moves_${gridSize}`) || 'N/A';
+        
+        // For authenticated users, we'll update best moves after we get the response from the server
+        if (!window.isAuthenticated) {
+            popup.querySelector('.best-moves').textContent = localStorage.getItem(`best_moves_${gridSize}`) || 'N/A';
+        }
+    
         popup.classList.remove('hidden');
 
-        // Emit to Livewire for authenticated users
-         
-        setTimeout(() => {
-            if (window.isAuthenticated) {
-                const scoreData = {
-                    moves: moveCount,
-                    time: timeTaken,
-                    difficulty: gridSize,
-                    game_id: window.gameId,
-                    timestamp: new Date().toISOString()
-                };
+        // For guest users
+        if (!window.isAuthenticated) {
+            const storedBestMoves = parseInt(localStorage.getItem(`best_moves_${gridSize}`)) || Infinity;
+            const isNewBest = moveCount < storedBestMoves;
 
-                console.log('Preparing to emit puzzleSolved', scoreData);
-                safeLivewireEmit('puzzleSolved', scoreData).then(success => {
-                    if (!success) {
-                        showTemporaryMessage('Score will be saved when connection improves');
-                    }
-                });
+            if (isNewBest) {
+                await saveBestMoves(moveCount);
+                popup.querySelector('.best-moves').textContent = moveCount;
             }
-        }, 0);
+        }
+        // For authenticated users - the server will tell us if it's a new best
+        else {
+            const scoreData = {
+                moves: moveCount,
+                time: timeTaken,
+                difficulty: gridSize,
+                game_id: window.gameId,
+                timestamp: new Date().toISOString()
+            };
+
+            console.log('Preparing to emit puzzleSolved', scoreData);
+            safeLivewireEmit('puzzleSolved', scoreData).then(response => {
+                if (response.success) {
+                    // Update the UI with the best moves from the database
+                    popup.querySelector('.best-moves').textContent = response.bestMoves || 'N/A';
+                } else {
+                    showTemporaryMessage('Score will be saved when connection improves');
+                }
+            });
+        }
     }
 
     // Safe Livewire emission
@@ -208,10 +224,52 @@ document.addEventListener('DOMContentLoaded', () => {
         bestMovesCounter.textContent = Math.min(moveCount, bestMoves);
     }
 
-    function loadBestStats() {
-        const best = localStorage.getItem(`best_moves_${gridSize}`) || 'N/A';
-        bestMovesCounter.textContent = best;
+  
+
+    async function loadBestMoves() {
+        if (! window.gameId) {
+            console.warn('Cannot load best moves: gameId is not set');
+            return;
+        }
+
+        if (window.isAuthenticated) {
+            console.log('Fetching best moves from server for game:',  window.gameId);
+            
+            // Clear any existing best moves while loading
+             bestMoves = null;
+            
+            try {
+                // Request fresh data from Livewire
+                await Livewire.dispatch('requestBestMoves', { gameId:  window.gameId });
+                
+                // The response will come via the 'best-moves-loaded' event
+            } catch (error) {
+                console.error('Failed to fetch best moves:', error);
+                 showTemporaryMessage('Could not load best moves');
+            }
+        } else {
+            // Guest user handling - use localStorage
+            const best = localStorage.getItem(`best_moves_${gridSize}`) || 'N/A';
+            bestMovesCounter.textContent = best;             
+            // bestMoves = bestMoves[ gameId] || null;
+            console.log('Loaded best moves from localStorage:',  bestMoves);
+        }
     }
+
+        // Add this event listener to handle the Livewire response
+        document.addEventListener('best-moves-loaded', (event) => {
+            if (event.detail.gameId ===  gameId) {
+                 bestMoves = event.detail.bestMoves;
+                console.log('Received best moves from server:',  bestMoves);
+                
+                // Update localStorage with fresh data
+                if (window.isAuthenticated) {
+                    const storage = JSON.parse(localStorage.getItem('game_best_moves') || {});
+                    storage[ gameId] = event.detail.bestMoves;
+                    localStorage.setItem('game_best_moves', JSON.stringify(storage));
+                }
+            }
+        });
 
     //  Event Listeners 
     function setupEventListeners() {

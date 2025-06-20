@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Laravel\Socialite\Facades\Socialite;
 
 
@@ -18,9 +19,11 @@ class GoogleController extends Controller
 
     public function handleGoogleCallback()
     {
+        
         // $googleUser = Socialite::driver('google')->stateless()->user();
         $googleUser = Socialite::driver('google')->user();
-
+       
+        
         $user = User::firstOrCreate(
             ['email' => $googleUser->getEmail()],
             [

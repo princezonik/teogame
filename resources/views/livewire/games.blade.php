@@ -231,8 +231,15 @@
 
         <!-- Game content -->
         <div id="game_wrapper" x-data x-cloak x-show="!loading" class=" flex transition-opacity duration-300 mt-[100px] justify-center items-center">
-            @livewire($games->slug, ['game' => $games], key($games->id))
-           {{-- @yield('game') --}}
+            @php
+                $componentExists = View::exists('livewire.' . $games->slug);
+            @endphp
+
+            @if($componentExists)
+                @livewire($games->slug, ['game' => $games], key($games->id))
+            @else
+                <p class="text-red-600 text-center py-8">Game component "{{ $games->slug }}" not found.</p>
+            @endif
         </div>
     
     @else

@@ -1,3 +1,36 @@
+// For getting data
+function getLocalStorage(key, defaultValue = null) {
+    try {
+        const item = localStorage.getItem(key);
+        return item ? JSON.parse(item) : defaultValue;
+    } catch (error) {
+        console.error(`Error parsing localStorage key "${key}":`, error);
+        localStorage.removeItem(key); // Remove corrupted data
+        return defaultValue;
+    }
+}
+
+// For setting data
+function setLocalStorage(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+    } catch (error) {
+        console.error(`Error saving to localStorage key "${key}":`, error);
+        // Handle storage full errors if needed
+    }
+}
+
+// Initialize storage when Alpine starts
+document.addEventListener('alpine:init', () => {
+  if (getLocalStorage('pendingScores') === null) {
+    setLocalStorage('pendingScores', []);
+  }
+  if (getLocalStorage('guestScores') === null) {
+    setLocalStorage('guestScores', {});
+  }
+ 
+});
+
 function puzzleBoard(data) {
     const MIN_COLOR_PAIRS = 4;
 
@@ -37,7 +70,7 @@ function puzzleBoard(data) {
             this.gameId = gameId;
             this.originalCells = JSON.parse(JSON.stringify(this.cells));
             this.originalConnections = JSON.parse(JSON.stringify(this.connections));
-             this.loadBestMoves();
+            this.loadBestMoves(gameId);
             this.setupEventListeners();
             this.renderAll();
 
@@ -51,56 +84,96 @@ function puzzleBoard(data) {
         async handlePuzzleCompletion() {
             this.isSolving = true;
             this.score = this.calculateScore();
-            if (this.bestMoves === null || this.moves < this.bestMoves) {
-                this.bestMoves = this.moves;
-                this.newBest = true;
-                await this.saveBestMoves(this.moves);
-            }
 
+            // Determine if this is a new best(lower moves)
+            const isNewBest = this.bestMoves === null || this.moves < this.bestMoves;
+
+            if (isNewBest) {
+                this.bestMoves = this.moves; 
+                this.newBest = true;
+                
+                // For guest users, save to localStorage immediately
+                if (!window.isAuthenticated) {
+                    await this.saveBestMoves(this.moves);
+                }
+            }
+                    
             const scoreData = {
                 moves: this.moves,
-                bestMoves: this.bestMoves,
+                bestMoves: isNewBest ? this.moves : this.bestMoves,
                 score: this.score,
                 game_id: this.gameId,
                 timestamp: new Date().toISOString(),
             };
 
-            console.log('Emitting game-completed event', scoreData);
-            if (window.isAuthenticated) {
-                const success = await this.safeLivewireEmit('game-completed', {data: scoreData});
-                if (!success) {
-                    this.showTemporaryMessage('Score will be saved when connection improves');
-                }
-            } else {
-                console.log('Guest user, skipping Livewire emit');
-            }
 
-            this.isSolving = false;
+            try {
+                if (window.isAuthenticated) {
+                    const success = await this.safeLivewireEmit('game-completed', {data: scoreData});
+                
+                    if (!success) {
+                        this.saveToPending(scoreData);
+                       
+                    } 
+                } else {
+                    this.updateLocalBestMoves(scoreData);
+                }
+            } catch (error) {
+                console.error('Completion error:', error);
+                // this.showErrorMessage('Error saving score');
+            } finally {
+                this.isSolving = false;
+            }
         },
 
-        async safeLivewireEmit(eventName, data, retries = 5, delay = 1000) {
-            console.log('Attempting to emit Livewire event', { eventName, data });
+        async safeLivewireEmit(eventName, data) {
             try {
-                let attempt = 0;
-                while (attempt <= retries) {
-                    if (window.Livewire && typeof Livewire.dispatchTo === 'function') {
-                        Livewire.dispatchTo('teogame-puzzle', eventName, data);
-                        console.log('Livewire event dispatched', { eventName, data });
-                        return true;
-                    }
-                    console.log(`Retry ${attempt + 1} for Livewire event`, { eventName, data });
-                    await new Promise(resolve => setTimeout(resolve, delay));
-                    attempt++;
+                if (!window.Livewire) {
+                    throw new Error('Livewire not loaded');
                 }
+                
+                return new Promise((resolve) => {
+                    const timeout = setTimeout(() => {
+                        document.removeEventListener('score-updated', listener);
+                        resolve(false);
+                    }, 3000);
 
-                console.warn('Livewire unavailable, storing event', { eventName, data });
-                const pendingEvents = JSON.parse(localStorage.getItem('pendingLivewireEvents') || '[]');
-                pendingEvents.push({ eventName, data });
-                localStorage.setItem('pendingLivewireEvents', JSON.stringify(pendingEvents));
+                    const listener = (event) => {
+                        clearTimeout(timeout);
+                        resolve(event.detail);
+                    };
+
+                    document.addEventListener('score-updated', listener, { once: true });
+                    Livewire.dispatch(eventName, data);
+                    });
+                } 
+            catch (error) {
+                console.error('Livewire emit error:', error);
                 return false;
-            } catch (error) {
-                console.error('Error emitting Livewire event:', error);
-                return false;
+            }
+        },
+
+        // Store pending scores for offline users
+        saveToPending(scoreData) {
+            const pending = getLocalStorage('pendingScores', []);
+            pending.push(scoreData);
+            setLocalStorage('pendingScores', pending);
+        },
+
+        // Update local storage for guests
+        updateLocalBestMoves(scoreData) {
+            const guestScores = getLocalStorage('guestScores', {});
+            const gameKey = `game_${scoreData.game_id}`;
+            
+            if (!guestScores[gameKey] || scoreData.moves < guestScores[gameKey].moves) {
+                guestScores[gameKey] = {
+                    moves: scoreData.moves,
+                    score: scoreData.score,
+                    timestamp: new Date().toISOString()
+                };
+                setLocalStorage('guestScores', guestScores);
+                this.bestMoves = scoreData.moves;
+                this.newBest = true;
             }
         },
 
@@ -112,46 +185,41 @@ function puzzleBoard(data) {
             setTimeout(() => msg.remove(), 3000);
         },
 
-        addPathPoint(color, point) {
-            if (!this.userPaths[color]) {
-                this.userPaths[color] = [];
-            }
-            this.userPaths[color].push(point);
-            this.incrementMove();
-            this.dispatchUpdatePath();
-            this.checkCompletion();
-        },
-
-        incrementMove() {
-            this.moves++;
-
-        },
-
         async loadBestMoves() {
-           if (!this.gameId) {
+
+            if (!this.gameId) {
                 console.warn('Cannot load best moves: gameId is not set');
                 return;
             }
 
-            if (window.authenticated) {
-                // Listen once for the Livewire browser event to get the best moves
-                const bestMovesListener = (event) => {
-                    if (event.detail.gameId === this.gameId) {
-                        this.bestMoves = event.detail.bestMoves || this.bestMoves;
-                        console.log('Loaded best moves from Livewire:', this.bestMoves);
-                        window.removeEventListener('best-moves-loaded', bestMovesListener);
+            if (window.isAuthenticated) {
+
+                const listener = (event) => {
+
+                    if (event.detail?.gameId === this.gameId) {
+                        // Force Alpine to react
+                        this.bestMoves = Number(event.detail.bestMoves);
+
+                        // this.$nextTick(() => {
+                        // });
+
+                        window.removeEventListener('best-moves-loaded', listener, { once: true });
                     }
                 };
 
-                window.addEventListener('best-moves-loaded', bestMovesListener);
+                window.addEventListener('best-moves-loaded', listener, { once: true });
 
-                // Emit to Livewire to request best moves
-                Livewire.emit('requestBestMoves', this.gameId);
+               // Emit to Livewire
+                try {
+                    Livewire.dispatch('requestBestMoves', { 
+                        gameId: this.gameId 
+                    });
+                } catch (e) {
+                    console.error('Error emitting to Livewire:', e);
+                }
             }else {
                 const bestMoves = JSON.parse(localStorage.getItem('game_best_moves') || '{}');
                 this.bestMoves = bestMoves[this.gameId] || this.bestMoves;
-                console.log('Loaded best moves:', { gameId: this.gameId, bestMoves: this.bestMoves });
-
             }
             
 
@@ -171,6 +239,35 @@ function puzzleBoard(data) {
             } else {
                 this.bestMoves = previousBest;
             }
+        },
+
+        
+        // Get pending scores
+        getPendingScores() {
+        return getLocalStorage('pendingScores', []);
+        },
+
+        
+        // Clear pending scores
+        clearPendingScores(gameId = null) {
+            if (gameId) {
+                const pending = getPendingScores().filter(
+                score => score.game_id !== gameId
+                );
+                setLocalStorage('pendingScores', pending);
+            } else {
+                localStorage.removeItem('pendingScores');
+            }
+        },
+
+        
+
+        calculateScore() {
+            const totalPaths = Object.keys(this.connections).length;
+            const baseScore = totalPaths * 100;
+            const penalty = this.moves - totalPaths;
+            const finalScore = Math.max(0, baseScore - penalty * 2);
+            return finalScore;
         },
 
 
@@ -435,12 +532,19 @@ function puzzleBoard(data) {
             this.isCompleted = allComplete;
         },
 
-        calculateScore() {
-            const totalPaths = Object.keys(this.connections).length;
-            const baseScore = totalPaths * 100;
-            const penalty = this.moves - totalPaths;
-            const finalScore = Math.max(0, baseScore - penalty * 2);
-            return finalScore;
+        addPathPoint(color, point) {
+            if (!this.userPaths[color]) {
+                this.userPaths[color] = [];
+            }
+            this.userPaths[color].push(point);
+            this.incrementMove();
+            this.dispatchUpdatePath();
+            this.checkCompletion();
+        },
+
+        incrementMove() {
+            this.moves++;
+
         },
 
         isValidStart(color, point) {

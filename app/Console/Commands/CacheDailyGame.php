@@ -33,14 +33,14 @@ class CacheDailyGame extends Command
     }
     public function handle()
     {
-         $games = $this->dailyGameService->getDailyGame();
+        $games = $this->dailyGameService->getDailyGame();
         
         if ($games) {
-            $this->info("Daily game cached: {$games->title}");
-        } else {
             $this->error('No game available to cache.');
         }
-
+        
+        $this->info("Daily game cached: {$games->title}");
+        
         $date = now();        
         $gridSize = 5;    
 
@@ -48,8 +48,10 @@ class CacheDailyGame extends Command
             $puzzle = $this->puzzleGenerator->generate($date, $gridSize, $games);
 
             $this->info("Puzzle generated for '{$games->title}' on {$date->toDateString()} with ID {$puzzle->id}.");
+            return Command::SUCCESS;
         } catch (\Exception $e) {
             $this->error('Failed to generate puzzle: ' . $e->getMessage());
+            return Command::FAILURE;
         }
     }
 }

@@ -12,8 +12,21 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware) {
-        //
+        
+        $middleware->alias([
+            'admin' => App\Http\Middleware\AdminMiddleware::class,
+        ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->create();
+
+// // Register Socialite provider and event AFTER configuration but BEFORE return
+// $app->register(\SocialiteProviders\Manager\ServiceProvider::class);
+// $app['events']->listen(
+//     \SocialiteProviders\Manager\SocialiteWasCalled::class,
+//     \SocialiteProviders\Google\GoogleExtendSocialite::class.'@handle'
+// );
+
+// return $app;

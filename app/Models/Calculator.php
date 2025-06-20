@@ -12,6 +12,13 @@ class Calculator extends Model
     protected $fillable = ['slug', 'title', 'description'];
 
     protected $casts = [
-        'fields' => 'array'
+        'updated_at' => 'datetime',
+        'settings' => 'array'
     ];
+
+    public function usages()
+    {
+        return $this->hasMany(CalculatorUsage::class);
+    }
+
 }

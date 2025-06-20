@@ -3,6 +3,7 @@
 namespace App\Livewire;
 
 use App\Services\DailyGameService;
+use Illuminate\Support\Facades\Log;
 use Livewire\Component;
 
 class Games extends Component
@@ -15,12 +16,8 @@ class Games extends Component
         $this->games = $dailyGameService->getDailyGame();
 
         if ($this->games) {
-            //If the event might be dispatched before the Leaderboard mounts, store the game ID in the session:
-            // session()->put('current_game', [
-            //     'id' => $this->games->id,
-            //     'slug' => $this->games->slug
-            // ]);
 
+            // Dispatch events for Alpine or other Livewire components to react
             $this->dispatch('gameReady', 
                 gameId: $this->games->id,
                 slug: $this->games->slug
@@ -32,13 +29,16 @@ class Games extends Component
             );
 
             $this->isGameLoaded = true;
+        }else {
+           
+            Log::warning('❌ No daily game available for today');
         }
     }
 
     // method to handle game initialization
     public function loadGame($slug)
     {
-        if (!$this->games) {
+        if (!$this->games || $this->games->slug !== $slug) {
             return;
         }
 

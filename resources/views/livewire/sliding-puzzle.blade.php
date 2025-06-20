@@ -17,7 +17,7 @@
                 🧮 Moves: <span id="move-counter" class="font-bold">0</span>
             </div>
             <div class="text-lg">
-                ⏱️ Time: <span id="time-counter" class="font-bold">0:00</span>
+                ⏱️ Time: <span id="time-counter" class="font-bold">00:00</span>
             </div>
             <div class="text-lg">
                 🏆 Best Moves: <span id="best-moves-counter" class="font-bold">{{ $bestMoves ?? 'N/A' }}</span>
@@ -126,7 +126,7 @@
         window.gameId = {{ $game->id }}; // Should Not be null when echo initializes
         window.isAuthenticated = @json(auth()->check());
         window.difficultyLevel = 3; // Default difficulty
-    </script>
+        </script>
 
     <script>
         document.addEventListener('livewire:initialized', function () {
@@ -140,5 +140,5 @@
         });
     </script>
 
-    <script src="{{ asset('js/slidingPuzzle.js') }}"></script>
+<script src="{{ asset('js/slidingPuzzle.js') }}"></script>
 @endpush

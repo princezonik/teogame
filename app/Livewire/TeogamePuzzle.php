@@ -26,7 +26,7 @@ class TeogamePuzzle extends Component
     public $moves = 0;
     public $bestMoves = null;
     public $score = null;
-
+    
 
     public function mount($date = null, $gameId = null)
     {
@@ -43,8 +43,7 @@ class TeogamePuzzle extends Component
             'gameId' => $this->game->id,
             'slug' => $this->game->slug,
         ]);
-         
-        // $this->loadBestMoves();
+
         
     }
 
@@ -96,6 +95,118 @@ class TeogamePuzzle extends Component
         }
     }
 
+    #[On('game-completed')]
+    public function handleCompletion(array $data = [])
+    {
+        $validated = Validator::make($data, [
+            'moves' => 'required|integer|min:0',
+            'bestMoves' => 'nullable|integer|min:0',
+            'score' => 'required|integer|min:0',
+            'game_id' => 'required|exists:games,id',
+            'timestamp' => 'required|date',
+        ])->validate();
+
+        if ($validated['game_id'] != $this->game->id) {
+            Log::error('Game ID mismatch', ['received' => $validated['game_id'], 'expected' => $this->game->id]);
+            return;
+        }
+
+        if (!Auth::check()) {
+            return; // Guest handling is done in frontend
+        }
+
+        $newScore = $validated['score'];
+
+        // Get current best record
+        $existingScore = Score::where('user_id', Auth::id())->where('game_id', $this->game->id)->first();
+
+        // Validate if the new score is better
+        $shouldUpdate = !$existingScore || ($newScore > $existingScore->score) || ($validated['moves'] < $existingScore->moves);
+        
+        if (!$shouldUpdate) {
+            Log::info('Score not updated', [
+                'current_score' => $existingScore->score ?? null,
+                'new_score' => $validated['score'],
+                'current_moves' => $existingScore->moves ?? null,
+                'new_moves' => $validated['moves']
+            ]);
+
+            return;
+        }
+
+        // Calculate new best moves (minimum of existing and new)
+        $newBestMoves = min(
+            $validated['moves'],
+            $existingScore->best_moves ?? $validated['moves']
+        );
+        
+        try {
+            $score = Score::updateOrCreate(
+                [
+                    'user_id' => Auth::id(),
+                    'game_id' => $validated['game_id'],
+                ],
+                [
+                    'score' => max($newScore, $existingScore->score ?? 0),
+                    'best_moves' => $newBestMoves,
+                    'moves' => $validated['moves'],
+                ]
+            );
+            
+            $this->isCompleted = true;
+            $this->bestMoves = $score->best_moves;
+            
+            Log::info('Score saved successfully', $score->toArray());
+
+            // $this->dispatch('scoreSaved',$score->toArray(), ['message' => 'Score saved successfully']);
+            event(new ScoreUpdated($score));
+
+        } catch (\Exception $e) {
+            Log::error('Score save error', [
+                'error' => $e->getMessage(),
+                'data' => $data,
+            ]);
+            // $this->dispatch('showError', ['message' => 'Failed to save score']);
+        }
+    }
+
+
+    protected function calculateScore()
+    {
+        
+        $maxMoves = $this->gridSize * $this->gridSize * 2;
+        
+        return max(100, $maxMoves - ($this->moves * 10));
+    }
+
+    #[On('requestBestMoves')]
+    public function loadBestMoves($gameId)
+    {        
+
+        if (Auth::check()) {
+            $score = Score::where('user_id', Auth::id())
+                ->where('game_id', $gameId)
+                ->first();
+            $this->bestMoves = $score->best_moves ?? null;
+           
+            $this->dispatch('best-moves-loaded', 
+                gameId: $gameId, 
+                bestMoves: $this->bestMoves,
+            );
+        }
+    }
+
+    protected function calculateBestMoves()
+    {
+        if (!Auth::check()) {
+            return $this->bestMoves;
+        }
+        $currentBest = Score::where('user_id', Auth::id())
+            ->where('game_id', $this->game->id)
+            ->value('best_moves') ?? PHP_INT_MAX;
+        return min($currentBest, $this->moves);
+    }
+
     protected function validatePath($color, $path)
     {
         if (!isset($this->connections[$color]) || empty($path)) {
@@ -124,111 +235,6 @@ class TeogamePuzzle extends Component
 
         return true;
     }
-
-
-    #[On('game-completed')]
-    public function handleCompletion(array $data = [])
-    {
-        Log::info('Received game-completed event', ['data' => $data]);
-
-
-        if (!Auth::check()) {
-            Log::info('Guest user completed puzzle, skipping DB save', ['data' => $data]);
-            return;
-        }
-
-        $validated = Validator::make($data, [
-            'moves' => 'required|integer|min:0',
-            'bestMoves' => 'nullable|integer|min:0',
-            'score' => 'required|integer|min:0',
-            'game_id' => 'required|exists:games,id',
-            'timestamp' => 'required|date',
-        ])->validate();
-
-        if ($validated['game_id'] != $this->game->id) {
-            Log::error('Game ID mismatch', ['received' => $validated['game_id'], 'expected' => $this->game->id]);
-            return;
-        }
-
-        $newScore = $validated['score'];
-
-        $existingScore = Score::where('user_id', Auth::id())->where('game_id', $this->game->id)->first();
-
-        if ($existingScore && $existingScore->score >= $newScore) {
-            Log::info('New score not higher, no update', [
-                'new_score' => $newScore,
-                'existing_score' => $existingScore->score,
-            ]);
-            return;
-        }
-
-        try {
-            $score = Score::updateOrCreate(
-                [
-                    'user_id' => Auth::id(),
-                    'game_id' => $this->game->id,
-                ],
-                [
-                    'score' => $newScore,
-                    'best_moves' => $validated['bestMoves'] ?? $existingScore?->best_moves ?? $validated['moves'],
-                    'moves' => $validated['moves'],
-                ]
-            );
-
-            Log::info('Score saved successfully', $score->toArray());
-            $this->dispatch('scoreSaved', ['message' => 'Score saved successfully']);
-            event(new ScoreUpdated($score));
-
-        } catch (\Exception $e) {
-            Log::error('Score save error', [
-                'error' => $e->getMessage(),
-                'data' => $data,
-            ]);
-            $this->dispatch('showError', ['message' => 'Failed to save score']);
-        }
-
-        $this->isCompleted = true;
-        $this->bestMoves = $score->best_moves;
-        $this->dispatch('puzzleCompleted', [
-            'moves' => $validated['moves'],
-            'bestMoves' => $score->best_moves,
-            'score' => $newScore,
-        ]);
-    }
-
-
-    protected function calculateScore()
-    {
-        
-        $maxMoves = $this->gridSize * $this->gridSize * 2;
-        
-        return max(100, $maxMoves - ($this->moves * 10));
-    }
-
-    #[On('requestBestMoves')]
-    protected function loadBestMoves($gameId)
-    {
-
-        if (Auth::check()) {
-            $score = Score::where('user_id', Auth::id())
-                ->where('game_id', $this->game->id)
-                ->first();
-            $this->bestMoves = $score->best_moves ?? null;
-            $this->dispatch('best-moves-loaded', ['gameId' => $gameId, 'bestMoves' => $this->bestMoves]);
-        }
-    }
-
-    protected function calculateBestMoves()
-    {
-        if (!Auth::check()) {
-            return $this->bestMoves;
-        }
-        $currentBest = Score::where('user_id', Auth::id())
-            ->where('game_id', $this->game->id)
-            ->value('best_moves') ?? PHP_INT_MAX;
-        return min($currentBest, $this->moves);
-    }
-
   
     public function render()
     {

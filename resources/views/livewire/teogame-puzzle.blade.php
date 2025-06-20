@@ -1,4 +1,4 @@
-<div x-data="puzzleBoard({
+<div  wire:ignore x-data="puzzleBoard({
         gridSize: {{ $gridSize ?? 5 }},
         cells: @js($cells),
         connections: @js($connections),
@@ -8,9 +8,7 @@
         bestMoves: {{ $bestMoves ?? 'null' }},
         bestMovesFromServer: @js($bestMoves),
         isAuth: @js(auth()->check())
-        
-       
-        
+ 
     })"
      x-init="init('{{ $game->id }}')" 
      class="max-w-2xl mx-auto p-4">
@@ -112,6 +110,8 @@
 
 @push('scripts')
     <script>
+        
+      
         window.gameId = {{ $game->id }}; // Should Not be null when echo initializes
         window.isAuthenticated = @json(Auth()->check());
         window.bestMovesFromServer = @json($bestMoves ?? null);

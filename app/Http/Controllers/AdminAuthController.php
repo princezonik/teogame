@@ -1,4 +1,4 @@
-<?php
+<!-- <?php
 
 namespace App\Http\Controllers;
 
@@ -50,4 +50,4 @@ public function logout(Request $request)
 
     return redirect()->route('admin.logout')->with('status', 'Logged out successfully.');
 }
-}
+} -->

@@ -15,7 +15,11 @@ use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\CalculatorController;
-
+use App\Livewire\Admin\Auth\Auth;
+use App\Livewire\Admin\Auth\Login;
+use App\Livewire\Admin\Calculators\Calculators;
+use App\Livewire\Admin\Calculators\UsageHistory;
+use App\Livewire\Admin\Dashboard;
 
 Route::get('/', HomePage::class)->name('home');
 
@@ -46,26 +50,21 @@ Route::get('/dashboard', function () {
 })->middleware(['auth'])->name('dashboard');
 
 
-// Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
-// Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
+Route::get('auth/google', [GoogleController::class, 'redirectToGoogle'])->name('google.login');
+Route::get('auth/google/callback', [GoogleController::class, 'handleGoogleCallback']);
 
 
+Route::get('/admin/login', Login::class)->name('admin.login');
 
-Route::prefix('admin')->name('admin.')->group(function () {
-    // Show login form
-    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('login');
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', Dashboard::class)->name('admin.dashboard');
+
+    Route::get('/calculators', Calculators::class)->name('admin.calculators');
+    Route::get('/usage-history', UsageHistory::class)->name('admin.usage.history');
+
+    Route::post('/logout', [AdminAuthController::class, 'logout']);
+
     
-    // Handle login
-    Route::post('/login', [AdminAuthController::class, 'login']);
-    
-    // Register
-    Route::get('/register', [AdminAuthController::class, 'showRegisterForm'])->name('register');
-    Route::post('/register', [AdminAuthController::class, 'register']);
-    
-    // Admin dashboard (after login)
-    Route::middleware('auth:admin')->group(function () {
-        Route::get('/dashboard', fn () => view('admin.dashboard'))->name('dashboard');
-    });
 });
 
 
