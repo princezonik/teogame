@@ -20,6 +20,8 @@ return new class extends Migration
             $table->string('type')->default('puzzle');
             $table->boolean('tracks_time')->default(false);
             $table->boolean('tracks_moves')->default(false);
+            $table->boolean('can_generate')->default(false);
+
             $table->timestamps();
         });
     }

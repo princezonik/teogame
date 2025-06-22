@@ -20,8 +20,10 @@ use App\Livewire\Admin\Auth\Login;
 use App\Livewire\Admin\Calculators\Calculators;
 use App\Livewire\Admin\Calculators\UsageHistory;
 use App\Livewire\Admin\Dashboard;
+use App\Livewire\Admin\Leaderboard;
+use App\Livewire\Admin\PuzzleManager;
 
-Route::get('/', HomePage::class)->name('home');
+Route::get('/', HomePage::class)->middleware('guest')->name('home');
 
 
 Route::get('/register', [RegisteredUserController::class, 'showRegisterForm'])->name('register');
@@ -61,6 +63,8 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
 
     Route::get('/calculators', Calculators::class)->name('admin.calculators');
     Route::get('/usage-history', UsageHistory::class)->name('admin.usage.history');
+    Route::get('/leaderboard', Leaderboard::class)->name('admin.leaderboard');
+    Route::get('/manage-puzzles', PuzzleManager::class)->name('admin.manage.puzzle');
 
     Route::post('/logout', [AdminAuthController::class, 'logout']);
 

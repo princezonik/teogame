@@ -23,6 +23,7 @@ return new class extends Migration
             $table->integer('best_moves')->nullable();
             $table->integer('time')->nullable();
             $table->integer('difficulty')->nullable();
+          
             $table->timestamps();
 
             $table->unique(['user_id', 'game_id']);

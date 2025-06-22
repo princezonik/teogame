@@ -1,10 +1,24 @@
-<div x-data="{ open: @entangle('activeCalculator')}" id="kt_aside" class="aside sidebar-dark flex flex-col  overflow-y-scroll" >
+<div x-data="{ sidebarOpen: false  open: @entangle('activeCalculator')}" id="kt_aside" class="aside sidebar-dark flex flex-col  overflow-y-scroll" >
     
     <!-- sidebar container with two sliding panel -->
+
+    <!-- Hamburger Button: show on small screens only -->
+    <button 
+        @click="sidebarOpen = !sidebarOpen" 
+        class="md:hidden fixed top-[50px] left-4 z-50 p-2 rounded-md bg-gray-800 text-white shadow-lg focus:outline-none"
+        aria-label="Toggle sidebar"
+    >
+        <!-- Hamburger icon -->
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" 
+            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" 
+                d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+    </button>
     
     <div class="absolute h-[650px] w-[300px] overflow-hidden">
         <div :class="open ? '-translate-x-[50%]' : 'translate-x-0'"
-              class="absolute inset-0 flex w-[200%] transform transition-transform duration-300 ease-in-out"
+              class="absolute inset-y-0 flex w-[200%] transform  md:translate-x-0 md:static md:flex md:flex-col  transition-transform duration-300 ease-in-out overflow-y-auto z-40"
         >
             <!-- Calculator List Panel -->
             <div class="w-1/2 h-4/5 p-14"> 

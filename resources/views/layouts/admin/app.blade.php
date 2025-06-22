@@ -34,7 +34,38 @@
         <!--begin::Theme mode setup on page load-->
 		<script>var defaultThemeMode = "light"; var themeMode; if ( document.documentElement ) { if ( document.documentElement.hasAttribute("data-bs-theme-mode")) { themeMode = document.documentElement.getAttribute("data-bs-theme-mode"); } else { if ( localStorage.getItem("data-bs-theme") !== null ) { themeMode = localStorage.getItem("data-bs-theme"); } else { themeMode = defaultThemeMode; } } if (themeMode === "system") { themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light"; } document.documentElement.setAttribute("data-bs-theme", themeMode); }</script>
 		
-        <livewire:admin.partials.sidebar />
+        <div 
+            x-data="{ show: false, message: '', type: 'success' }"
+            x-on:notify.window="
+                show = true;
+                message = $event.detail.message;
+                type = $event.detail.type;
+                setTimeout(() => show = false, 3000);
+            "
+            x-show="show"
+            x-transition
+            class="fixed top-4 right-4 px-4 py-2 rounded shadow-lg text-white"
+            :class="{
+                'bg-green-500': type === 'success',
+                'bg-red-500': type === 'error',
+                'bg-yellow-500': type === 'warning',
+                'bg-blue-500': type === 'info'
+            }"
+            style="display: none;">
+            
+            <span x-text="message"></span>
+        </div>
+
+
+        <aside>
+            <livewire:admin.partials.sidebar />
+        </aside>
+
+        <div  class="fixed top-4 right-4 z-50">
+            <livewire:admin.partials.profile-modal />
+        </div>
+
+        
         {{$slot}}
 
 

@@ -59,10 +59,7 @@
                                 <!-- Main Calculator Menu Link -->
                                 <span class="menu-link">
                                     <span class="menu-icon">
-                                        <i class="ki-duotone ki-calculator fs-2" style="color: #8898aa;">
-                                            <span class="path1"></span>
-                                            <span class="path2"></span>
-                                        </i>
+                                        <i class="fas fa-calculator" style="color: #8898aa; font-size: 1.5rem;"></i>
                                     </span>
                                     <span class="menu-title" style="color:#9a9cae;;">Calculators</span>
                                     <span class="menu-arrow"></span>
@@ -94,16 +91,26 @@
                                 </div>
                             </div>
                             
-                            <!-- Projects Dashboard -->
-                            {{-- <div class="menu-item">
-                                <a class="menu-link" href="/metronic8/demo1/dashboards/projects.html">
-                                    <span class="menu-bullet">
-                                        <span class="bullet bullet-dot" style="background-color: #8898aa;"></span>
+                            <!-- Leaderboard -->
+                            <div class="menu-item">
+                                <a class="menu-link hover:text-white transition-colors duration-200 {{ request()->routeIs('admin.leaderboard') ? 'bg-gray-700 text-white' : 'text-gray-300' }}" href="{{ route('admin.leaderboard') }}">
+                                    <span class="menu-icon">
+                                        <i class="fas fa-trophy" style="color: #8898aa;"></i>
                                     </span>
-                                    <span class="menu-title" style="color: #fff;">Projects</span>
+                                    <span class="menu-title" style="color: #fff;">Leaderboard</span>
                                 </a>
-                            </div> --}}
-                            
+                            </div> 
+
+                            <!-- Manage Puzzles -->
+                            <div class="menu-item">
+                                <a class="menu-link hover:text-white transition-colors duration-200 {{ request()->routeIs('admin.manage.puzzle') ? 'bg-gray-700 text-white' : 'text-gray-300' }}" href="{{ route('admin.manage.puzzle') }}">
+                                    <span class="menu-icon">
+                                        <i class="fas fa-puzzle-piece" style="color: #8898aa;"></i>
+                                    </span>
+                                    <span class="menu-title" style="color: #fff;">Manage Puzzles</span>
+                                </a>
+                            </div> 
+
                         
                         </div>
                     </div>

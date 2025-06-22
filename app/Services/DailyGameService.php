@@ -13,7 +13,7 @@ class DailyGameService
     public function getDailyGame()
     {
       
-        return Cache::remember('daily_game'. now()->format('Y-m-d'), now()->endOfDay(), function () {
+        return Cache::remember('daily_game_'. now()->format('Y-m-d'), now()->endOfDay(), function () {
             $games = Game::all();
                 
             if ($games->isEmpty()) {
