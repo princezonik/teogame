@@ -9,7 +9,7 @@
 
     @livewire('games')
 
-    @livewire('aside')
+<!--     @livewire('aside') -->
 
     <livewire:footer />
 
