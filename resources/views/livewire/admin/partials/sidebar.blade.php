@@ -1,12 +1,12 @@
 <div>
     <div 
-<!--         x-data 
+{{--        x-data 
         x-show="$store.adminSidebar.open || window.innerWidth >= 1024" 
         @click.outside="$store.adminSidebar.close()"
         x-transition
         class="app-sidebar lg:block"
         :class="{ 'hidden': !$store.adminSidebar.open && window.innerWidth < 1024 }"
-        style="width: 265px; background-color: #0d0e12; height: 100vh; position: fixed; left: 0; top: 0;"> -->
+        style="width: 265px; background-color: #0d0e12; height: 100vh; position: fixed; left: 0; top: 0;"> --}}
         <!-- Sidebar Header -->
         <div class="sidebar-header" style="padding: 20px 0 0 20px; margin-bottom: 30px;">
             <h2 style="color: #fff; font-size: 1.5rem; font-weight: 600; margin: 0;">Teogame</h2>
