@@ -2,16 +2,22 @@
 
     @section('content')
 
-        <div class="flex">
-            @livewire('nav-bar')
+        <div class="flex flex-col">
+
+            <div class="flex">
+                @livewire('nav-bar')
+            </div>
+    
+            <div>
+                @livewire('games')
+    
+            </div>
+    
+    
+            @livewire('aside')
+    
+            
+            <livewire:footer />
         </div>
-
-        @livewire('games')
-
-        @livewire('aside')
-        
-        @livewire('footer')
-
-        
     @endsection
 </x-app-layout>

@@ -92,7 +92,7 @@
 
         @stack('scripts')
         @livewireScripts
-        {{-- <script>
+       <script>
             // Initialize game data with Livewire
             document.addEventListener('livewire:init', () => {
                 Livewire.on('gameReady', (gameId) => {
@@ -105,7 +105,18 @@
                     }
                 });
             });
-        </script> --}}
+
+            document.addEventListener('alpine:init', () => {
+                Alpine.store('adminSidebar', {
+                    open: false,
+                    toggle() { this.open = !this.open },
+                    close() { this.open = false }
+                });
+            });
+
+        </script> 
+
+
     </body>
 
     

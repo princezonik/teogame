@@ -1,28 +1,32 @@
-<div x-data="{ sidebarOpen: false  open: @entangle('activeCalculator')}" id="kt_aside" class="aside sidebar-dark flex flex-col  overflow-y-scroll" >
+<div x-data="{ open: @entangle('activeCalculator')}" 
+
+    class="aside sidebar-dark flex flex-col  overflow-y-scroll fixed top-0 left-0 h-full z-[99]"
+    :class="{'translate-x-0': $store.sidebar.open, '-translate-x-full lg:translate-x-0': !$store.sidebar.open}"
+    style="width: 300px; transition: transform 0.3s ease;" >
     
     <!-- sidebar container with two sliding panel -->
-
-    <!-- Hamburger Button: show on small screens only -->
-    <button 
-        @click="sidebarOpen = !sidebarOpen" 
-        class="md:hidden fixed top-[50px] left-4 z-50 p-2 rounded-md bg-gray-800 text-white shadow-lg focus:outline-none"
-        aria-label="Toggle sidebar"
-    >
-        <!-- Hamburger icon -->
-        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" 
-            viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-        <path stroke-linecap="round" stroke-linejoin="round" 
-                d="M4 6h16M4 12h16M4 18h16" />
-        </svg>
-    </button>
     
-    <div class="absolute h-[650px] w-[300px] overflow-hidden">
+    
+    <div class="absolute h-[650px] w-[300px] overflow-hidden relative">
         <div :class="open ? '-translate-x-[50%]' : 'translate-x-0'"
-              class="absolute inset-y-0 flex w-[200%] transform  md:translate-x-0 md:static md:flex md:flex-col  transition-transform duration-300 ease-in-out overflow-y-auto z-40"
+              class="absolute inset-0 flex w-[200%] transform transition-transform duration-300 ease-in-out"
         >
+
+        
             <!-- Calculator List Panel -->
             <div class="w-1/2 h-4/5 p-14"> 
+
+                <button 
+                    @click="$store.sidebar.open = false" 
+                    class="lg:hidden text-white hover:text-gray-300 focus:outline-none"
+                    title="Close Sidebar"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
                 <h2 class="text-lg font-bold mb-4 text-white"> Calculator Suite</h2>
+                
                 @foreach($calculators as $calc)
                     <button type="button" wire:click.prevent="toggleCalculator({{ $calc->id}})" class="block w-full text-left mb-2 menu-item p-2 "
                         > {{ $calc->title }}
@@ -154,6 +158,38 @@
             display: block;
             opacity: 1;
             transform: translateY(0);
+        }
+
+
+        
+        /* Sidebar styles */
+        .aside {
+            background-color: #1e1e2d; /* Match Metronic sidebar color */
+            box-shadow: 0 0 28px 0 rgb(82 63 105 / 5%);
+        }
+        
+        /* Ensure main content adjusts when sidebar is open */
+        @media (min-width: 992px) {
+            .aside {
+                position: relative;
+                transform: translateX(0) !important;
+            }
+        }
+        
+        /* Overlay for mobile */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 98;
+            display: none;
+        }
+        
+        .sidebar-overlay.active {
+            display: block;
         }
     </style>
 @endpush

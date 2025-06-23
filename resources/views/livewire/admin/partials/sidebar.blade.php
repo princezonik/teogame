@@ -1,8 +1,22 @@
 <div>
-    <div class="app-sidebar" style="width: 265px; background-color: #0d0e12; height: 100vh; position: fixed; left: 0; top: 0;">
+    <div 
+        x-data 
+        x-show="$store.adminSidebar.open || window.innerWidth >= 1024" 
+        @click.outside="$store.adminSidebar.close()"
+        x-transition
+        class="app-sidebar lg:block"
+        :class="{ 'hidden': !$store.adminSidebar.open && window.innerWidth < 1024 }"
+        style="width: 265px; background-color: #0d0e12; height: 100vh; position: fixed; left: 0; top: 0;">
         <!-- Sidebar Header -->
         <div class="sidebar-header" style="padding: 20px 0 0 20px; margin-bottom: 30px;">
             <h2 style="color: #fff; font-size: 1.5rem; font-weight: 600; margin: 0;">Teogame</h2>
+
+            <!-- X button for mobile -->
+    {{-- <button @click="$store.adminSidebar.close()" class="lg:hidden text-white hover:text-gray-400 focus:outline-none">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button> --}}
         </div>
 
         <!-- Menu Wrapper -->

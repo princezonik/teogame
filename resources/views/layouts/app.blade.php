@@ -41,10 +41,6 @@
            
             @yield('content')
         </main>
- 
-        
-        
-
         
         <!--begin::Javascript-->
         <!--begin::Global Javascript Bundle (mandatory for all pages)-->
@@ -81,6 +77,17 @@
                 });
             });
         </script> --}}
+
+        <script>
+            document.addEventListener('alpine:init', () => {
+                Alpine.store('sidebar', {
+                    open: false,
+                    toggle() {
+                        this.open = !this.open;
+                    }
+                });
+            });
+        </script>
     </body>
 
 </html>

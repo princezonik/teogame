@@ -33,7 +33,7 @@
     <!--begin::Header-->
     <div id="kt_header" class="header mt-0 mt-lg-0 pt-lg-0 " data-kt-sticky="true" data-kt-sticky-name="header" data-kt-sticky-offset="{lg: '300px'}">
         <!--begin::Container-->
-        <div class="container d-flex flex-stack flex-wrap gap-4 transparent" id="kt_header_container">
+        <div class="container mx-auto bg-black d-flex flex-stack flex-wrap gap-4 transparent" id="kt_header_container">
             <!--begin::Page title-->
             <div class="page-title d-flex flex-column align-items-start justify-content-center flex-wrap me-lg-2 pb-10 pb-lg-0" data-kt-swapper="true" data-kt-swapper-mode="prepend" data-kt-swapper-parent="{default: '#kt_content_container', lg: '#kt_header_container'}">
                 <!--begin::Heading-->
@@ -45,80 +45,20 @@
             <!--begin::Wrapper-->
             <div class="d-flex d-lg-none align-items-center ms-n3 me-2">
                 <!--begin::Aside mobile toggle-->
-                <div class="btn btn-icon btn-active-icon-primary" id="kt_aside_toggle">
+                <div @click="$store.sidebar.toggle()" class="btn btn-icon btn-active-icon-primary" >
                     <i class="ki-duotone ki-abstract-14 fs-1 mt-1">
                         <span class="path1"></span>
                         <span class="path2"></span>
                     </i>
                 </div>
-                <!--end::Aside mobile toggle-->
-                <!--begin::Logo-->
-                <a href="index.html" class="d-flex align-items-center">
-                    <img alt="Logo" src="assets/media/logos/demo3.svg" class="theme-light-show h-20px" />
-                    <img alt="Logo" src="assets/media/logos/demo3-dark.svg" class="theme-dark-show h-20px" />
-                </a>
+            
                 <!--end::Logo-->
             </div>
             <!--end::Wrapper-->
             <!--begin::Topbar-->
             <div class="d-flex align-items-center flex-shrink-0 mb-0 mb-lg-0">
-                <!--begin::Search-->
-                <div id="kt_header_search" class="header-search d-flex align-items-center w-lg-250px" data-kt-search-keypress="true" data-kt-search-min-length="2" data-kt-search-enter="enter" data-kt-search-layout="menu" data-kt-search-responsive="lg" data-kt-menu-trigger="auto" data-kt-menu-permanent="true" data-kt-menu-placement="bottom-end">
-                    <!--begin::Tablet and mobile search toggle-->
-                    <div data-kt-search-element="toggle" class="search-toggle-mobile d-flex d-lg-none align-items-center">
-                        <div class="d-flex btn btn-icon btn-color-gray-700 btn-active-color-primary btn-outline w-40px h-40px">
-                            <i class="ki-duotone ki-magnifier fs-1">
-                                <span class="path1"></span>
-                                <span class="path2"></span>
-                            </i>
-                        </div>
-                    </div>
-                    <!--end::Tablet and mobile search toggle-->
-                    <!--begin::Form(use d-none d-lg-block classes for responsive search)-->
-                    <form data-kt-search-element="form" class="d-none d-lg-block w-100 position-relative mb-2 mb-lg-0" autocomplete="off">
-                        <!--begin::Hidden input(Added to disable form autocomplete)-->
-                        <input type="hidden" />
-                        <!--end::Hidden input-->
-                        
-                        <!--begin::Input-->
-                        <input type="text" class="form-control bg-transparent ps-13 fs-7 h-40px" name="search" value="" placeholder="Quick Search" data-kt-search-element="input" />
-                        <!--end::Input-->
-                        
-                    
-                    </form>
-                    <!--end::Form-->
-                    
-                </div>
-                <!--end::Search-->
-                <!--begin::Activities-->
-                <div class="d-flex align-items-center ms-3 ms-lg-4">
-                    <!--begin::Drawer toggle-->
-                    <div class="btn btn-icon btn-color-gray-700 btn-active-color-primary btn-outline w-40px h-40px" id="kt_activities_toggle">
-                        <i class="ki-duotone ki-notification-bing fs-1">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                            <span class="path3"></span>
-                        </i>
-                    </div>
-                    <!--end::Drawer toggle-->
-                </div>
-                <!--end::Activities-->
-                <!--begin::Chat-->
-                <div class="d-flex align-items-center ms-3 ms-lg-4">
-                    <!--begin::Drawer wrapper-->
-                    <div class="btn btn-icon btn-color-gray-700 btn-active-color-primary btn-outline w-40px h-40px position-relative" id="kt_drawer_chat_toggle">
-                        <i class="ki-duotone ki-message-text-2 fs-1">
-                            <span class="path1"></span>
-                            <span class="path2"></span>
-                            <span class="path3"></span>
-                        </i>
-                        <!--begin::Bullet-->
-                        <span class="bullet bullet-dot bg-success h-6px w-6px position-absolute translate-middle top-0 start-50 animation-blink"></span>
-                        <!--end::Bullet-->
-                    </div>
-                    <!--end::Drawer wrapper-->
-                </div>
-                <!--end::Chat-->
+               
+                
                 <!--begin::Theme mode-->
                 <div class="d-flex align-items-center ms-3 ms-lg-4">
                     <!--begin::Menu toggle-->
