@@ -33,7 +33,8 @@ class GameSeeder extends Seeder
                 'title' => 'Sliding Puzzle',
                 'image' => 'images/slidingpuzzle.jpg',
                 'description' => 'A Sliding Puzzle (also known as a 15 Puzzle, 15-Slide, or Sliding Tile Puzzle) is a classic puzzle game where the goal is to rearrange tiles on a grid to achieve a specific final configuration. The puzzle consists of a set of numbered tiles arranged in a grid, with one empty space that allows the tiles to be moved by sliding them into the vacant spot.',
-                'slug' => 'sliding-puzzle'
+                'slug' => 'sliding-puzzle',
+                'can_generate' => false,
             ],
         
         
