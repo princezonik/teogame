@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 timestamp: new Date().toISOString()
             };
 
-            console.log('Preparing to emit puzzleSolved', scoreData);
+            // console.log('Preparing to emit puzzleSolved', scoreData);
             safeLivewireEmit('puzzleSolved', scoreData).then(response => {
                 if (response.success) {
                     // Update the UI with the best moves from the database

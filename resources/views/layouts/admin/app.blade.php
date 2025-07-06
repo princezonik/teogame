@@ -8,7 +8,7 @@
 
     
 
-        <title>@yield('title', 'Home') - {{ config('app.name', 'TeoGame') }}</title>
+        <title>@yield('title', 'Admin Dashboard') - {{ config('app.name', 'TeoGame') }}</title>
         
      
         

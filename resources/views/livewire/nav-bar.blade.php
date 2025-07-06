@@ -1,6 +1,6 @@
 <div x-data="{ open: @entangle('activeCalculator')}" 
 
-    class="aside sidebar-dark flex flex-col  overflow-y-scroll fixed top-0 left-0 h-full z-[99]"
+    class="aside flex flex-col  overflow-y-scroll fixed top-0 left-0 h-full z-[99]"
     :class="{'translate-x-0': $store.sidebar.open, '-translate-x-full lg:translate-x-0': !$store.sidebar.open}"
     style="width: 300px; transition: transform 0.3s ease;" >
     
@@ -94,9 +94,11 @@
                             <!--end::Menu separator-->
                           
                             <!--begin::Menu item-->
-                            <div class="menu-item px-5 my-1">
-                                <a href="{{route('profile.edit')}}" class="menu-link px-5">Account Settings</a>
-                            </div>
+                            @auth
+                                <div class="menu-item px-5 my-1">
+                                    <a href="{{route('profile.edit')}}" class="menu-link px-5">Account Settings</a>
+                                </div>
+                            @endauth
                             <!--end::Menu item-->
                             <!--begin::Menu item-->
                             <div class="menu-item px-5">
@@ -162,11 +164,6 @@
 
 
         
-        /* Sidebar styles */
-        .aside {
-            background-color: #1e1e2d; /* Match Metronic sidebar color */
-            box-shadow: 0 0 28px 0 rgb(82 63 105 / 5%);
-        }
         
         /* Ensure main content adjusts when sidebar is open */
         @media (min-width: 992px) {

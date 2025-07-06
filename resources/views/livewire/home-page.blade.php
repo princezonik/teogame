@@ -5,11 +5,9 @@
     </div>
     @livewire('nav-bar')
 
-  
-
     @livewire('games')
 
-    @livewire('aside')
+    {{-- @livewire('aside') --}}
 
     <livewire:footer />
 

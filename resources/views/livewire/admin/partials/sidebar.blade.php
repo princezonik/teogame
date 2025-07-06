@@ -1,11 +1,9 @@
 <div>
     <div 
-        x-data 
-        x-show="$store.adminSidebar.open || window.innerWidth >= 1024" 
-        @click.outside="$store.adminSidebar.close()"
+      
         x-transition
-        class="app-sidebar lg:block"
-        :class="{ 'hidden': !$store.adminSidebar.open && window.innerWidth < 1024 }"
+        class="app-sidebar "
+        
         style="width: 265px; background-color: #0d0e12; height: 100vh; position: fixed; left: 0; top: 0;">
         <!-- Sidebar Header -->
         <div class="sidebar-header" style="padding: 20px 0 0 20px; margin-bottom: 30px;">

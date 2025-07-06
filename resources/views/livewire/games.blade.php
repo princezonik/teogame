@@ -33,7 +33,7 @@
     <!--begin::Header-->
     <div id="kt_header" class="header mt-0 mt-lg-0 pt-lg-0 " data-kt-sticky="true" data-kt-sticky-name="header" data-kt-sticky-offset="{lg: '300px'}">
         <!--begin::Container-->
-        <div class="container mx-auto bg-black d-flex flex-stack flex-wrap gap-4 transparent" id="kt_header_container">
+        <div class="container mx-auto d-flex flex-stack flex-wrap gap-4 transparent" id="kt_header_container">
             <!--begin::Page title-->
             <div class="page-title d-flex flex-column align-items-start justify-content-center flex-wrap me-lg-2 pb-10 pb-lg-0" data-kt-swapper="true" data-kt-swapper-mode="prepend" data-kt-swapper-parent="{default: '#kt_content_container', lg: '#kt_header_container'}">
                 <!--begin::Heading-->
